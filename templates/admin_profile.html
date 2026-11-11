@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Profile & Security - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            {% with active_page='profile' %}
+                {% include 'components/admin_sidebar.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">
+                        <i class="bi bi-person-gear me-2 text-primary"></i>Administrator Profile & Security
+                    </h2>
+                    <p class="text-muted mb-0">Manage your system credentials, account profile, and administrative authentication settings.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Account Overview Card -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100 bg-white">
+                        <div class="bg-dark text-white rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 80px; height: 80px;">
+                            <i class="bi bi-shield-lock-fill fs-1 text-warning"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">{{ admin_user.username }}</h5>
+                        <p class="text-muted small mb-2">{{ admin_user.email }}</p>
+                        <div>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill">
+                                System Administrator
+                            </span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-start small">
+                            <div class="d-flex justify-content-between py-1">
+                                <span class="text-muted">Account ID:</span>
+                                <span class="fw-semibold text-dark">#{{ admin_user.id }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span class="text-muted">Account Status:</span>
+                                <span class="badge bg-success-subtle text-success">Active</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span class="text-muted">Member Since:</span>
+                                <span class="fw-semibold text-dark">{{ admin_user.created_at.strftime('%b %d, %Y') if admin_user.created_at else 'Initial Setup' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forms Column -->
+                <div class="col-lg-8">
+                    <!-- Update Username Form Card -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-person-badge text-primary me-2"></i>Update Account Details
+                            </h5>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <form method="POST" action="{{ url_for('admin.profile') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="action" value="update_profile">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Email Address</label>
+                                    <input type="email" class="form-control bg-light" value="{{ admin_user.email }}" readonly disabled>
+                                    <div class="form-text">Primary administrator email cannot be altered directly.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="username" class="form-label fw-semibold">Administrator Username <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="username" name="username" value="{{ admin_user.username }}" required>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                        <i class="bi bi-check2 me-1"></i> Update Username
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Change Password Form Card -->
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-key-fill text-danger me-2"></i>Change Master Password
+                            </h5>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <form method="POST" action="{{ url_for('admin.profile') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="action" value="change_password">
+
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label fw-semibold">Current Password <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="new_password" class="form-label fw-semibold">New Password <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="new_password" name="new_password" minlength="8" required>
+                                        <div class="form-text">Minimum 8 characters.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="confirm_password" class="form-label fw-semibold">Confirm New Password <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="8" required>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-danger rounded-pill px-4">
+                                        <i class="bi bi-shield-check me-1"></i> Change Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

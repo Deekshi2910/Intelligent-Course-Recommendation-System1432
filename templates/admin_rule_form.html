@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit AI Rule: ' + rule.rule_name if rule else 'Create New AI Rule' }} - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            {% with active_page='rules' %}
+                {% include 'components/admin_sidebar.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-1">
+                            <li class="breadcrumb-item"><a href="{{ url_for('admin.rules') }}" class="text-decoration-none">AI Rules</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ 'Edit Rule' if rule else 'Create Rule' }}</li>
+                        </ol>
+                    </nav>
+                    <h2 class="h3 fw-bold text-dark mb-0">
+                        <i class="bi bi-{{ 'pencil-square' if rule else 'plus-circle' }} me-2 text-primary"></i>
+                        {{ 'Edit AI Rule: ' + rule.rule_name if rule else 'Create New AI Knowledge Rule' }}
+                    </h2>
+                </div>
+                <a href="{{ url_for('admin.rules') }}" class="btn btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Rules
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('admin.rules_edit', rule_id=rule.id) if rule else url_for('admin.rules_add') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Rule Header Info -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-gear-wide-connected me-2"></i>Rule Definition & Recommendation Consequent
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-5">
+                                <label for="rule_name" class="form-label fw-semibold">Rule Identifier <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="rule_name" name="rule_name" 
+                                       placeholder="e.g. Rule_Machine_Learning_Core" 
+                                       value="{{ rule.rule_name if rule else '' }}" required>
+                                <div class="form-text">Unique declarative rule key for the expert system.</div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <label for="recommended_course_id" class="form-label fw-semibold">Recommended Course (THEN Consequent) <span class="text-danger">*</span></label>
+                                <select class="form-select" id="recommended_course_id" name="recommended_course_id" required>
+                                    <option value="">-- Choose Recommended Course --</option>
+                                    {% for c in all_courses %}
+                                    <option value="{{ c.id }}" {% if rule and rule.recommended_course_id == c.id %}selected{% endif %}>
+                                        {{ c.course_code }} - {{ c.course_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="priority" class="form-label fw-semibold">Priority (1-10) <span class="text-danger">*</span></label>
+                                <input type="number" min="1" max="10" class="form-control" id="priority" name="priority" 
+                                       value="{{ rule.priority if rule else 5 }}" required>
+                                <div class="form-text">Higher fires first.</div>
+                            </div>
+                        </div>
+
+                        <!-- Rule Conditions (Antecedents) -->
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-funnel me-2"></i>Antecedent Conditions (IF Clause)
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="min_cgpa" class="form-label fw-semibold">Minimum Student CGPA</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-bar-chart"></i></span>
+                                    <input type="number" step="0.01" min="0.0" max="4.0" class="form-control" id="min_cgpa" 
+                                           name="min_cgpa" value="{{ conditions.min_cgpa if conditions and conditions.min_cgpa is defined else '2.00' }}">
+                                </div>
+                                <div class="form-text">Student must satisfy CGPA ≥ threshold.</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="min_semester" class="form-label fw-semibold">Minimum Semester Required</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                    <input type="number" min="1" max="8" class="form-control" id="min_semester" 
+                                           name="min_semester" value="{{ conditions.min_semester if conditions and conditions.min_semester is defined else 1 }}">
+                                </div>
+                                <div class="form-text">Eligible from this semester onward.</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold d-block">Rule Activation Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="is_active" name="is_active" value="1" 
+                                           {% if not rule or rule.is_active %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="is_active">Rule Active</label>
+                                </div>
+                                <div class="form-text">Disabled rules are skipped during inference.</div>
+                            </div>
+
+                            <!-- Required Interests Selection -->
+                            <div class="col-12 mt-3">
+                                <label class="form-label fw-semibold">Required Student Interests (At least one match)</label>
+                                <div class="p-3 bg-light rounded-3 border">
+                                    <div class="row g-2">
+                                        {% for interest in all_interests %}
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="required_interests" 
+                                                       value="{{ interest.interest_name }}" id="req_interest_{{ interest.id }}"
+                                                       {% if conditions and conditions.required_interests and interest.interest_name in conditions.required_interests %}checked{% endif %}>
+                                                <label class="form-check-label text-dark" for="req_interest_{{ interest.id }}">
+                                                    {{ interest.interest_name }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preferred Career Goals Selection -->
+                            <div class="col-12 mt-3">
+                                <label class="form-label fw-semibold">Preferred Career Goals (Aligned Pathways)</label>
+                                <div class="p-3 bg-light rounded-3 border">
+                                    <div class="row g-2">
+                                        {% for goal in all_career_goals %}
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="preferred_career_goals" 
+                                                       value="{{ goal.goal_name }}" id="pref_goal_{{ goal.id }}"
+                                                       {% if conditions and conditions.preferred_career_goals and goal.goal_name in conditions.preferred_career_goals %}checked{% endif %}>
+                                                <label class="form-check-label text-dark" for="pref_goal_{{ goal.id }}">
+                                                    {{ goal.goal_name }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rationale / Reasoning -->
+                            <div class="col-12 mt-3">
+                                <label for="rationale" class="form-label fw-semibold">Inference Engine Rationale / Explanation <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="rationale" name="rationale" rows="3" 
+                                          placeholder="Explain why this course is recommended when these conditions trigger..." required>{{ conditions.rationale if conditions and conditions.rationale else '' }}</textarea>
+                                <div class="form-text">Displayed to the student as human-understandable AI reasoning behind this course recommendation.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('admin.rules') }}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                <i class="bi bi-check-circle me-1"></i> {{ 'Update AI Rule' if rule else 'Save AI Rule' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

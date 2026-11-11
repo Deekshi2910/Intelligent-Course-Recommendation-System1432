@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Career Goals - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            {% with active_page='career_goals' %}
+                {% include 'components/admin_sidebar.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">
+                        <i class="bi bi-compass-fill me-2 text-primary"></i>Career Pathways & Goals
+                    </h2>
+                    <p class="text-muted mb-0">Define professional trajectories aligned with curriculum learning outcomes.</p>
+                </div>
+                <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add New Career Goal
+                </button>
+            </div>
+
+            <!-- Career Goals Table Card -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        Registered Career Goals
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill ms-2">{{ career_goals|length }} Total</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4" style="width: 80px;"># ID</th>
+                                    <th style="width: 250px;">Career Goal Name</th>
+                                    <th>Description & Target Industry Role</th>
+                                    <th class="text-center" style="width: 140px;">Students</th>
+                                    <th class="text-end pe-4" style="width: 160px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if career_goals %}
+                                    {% for item in career_goals %}
+                                    <tr>
+                                        <td class="ps-4 fw-semibold text-muted">#{{ item.id }}</td>
+                                        <td>
+                                            <span class="fw-bold text-dark">{{ item.goal_name }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small">{{ item.description or 'No detailed description provided.' }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+                                                <i class="bi bi-people me-1"></i> {{ item.student_count }} Students
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-secondary" title="Edit Goal"
+                                                        data-bs-toggle="modal" data-bs-target="#editGoalModal{{ item.id }}">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                {% if item.student_count == 0 %}
+                                                <button type="button" class="btn btn-outline-danger" title="Delete Unused Goal"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteGoalModal{{ item.id }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                {% else %}
+                                                <button type="button" class="btn btn-outline-secondary opacity-50" disabled 
+                                                        title="Cannot delete: currently selected by active students">
+                                                    <i class="bi bi-lock-fill"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+
+                                            <!-- Edit Modal -->
+                                            <div class="modal fade text-start" id="editGoalModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow rounded-4">
+                                                        <form method="POST" action="{{ url_for('admin.career_goal_edit', goal_id=item.id) }}">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold">Edit Career Goal</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body py-4">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold">Goal Name <span class="text-danger">*</span></label>
+                                                                    <input type="text" class="form-control" name="goal_name" value="{{ item.goal_name }}" required>
+                                                                </div>
+                                                                <div class="mb-0">
+                                                                    <label class="form-label fw-semibold">Description</label>
+                                                                    <textarea class="form-control" name="description" rows="3">{{ item.description or '' }}</textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Delete Modal -->
+                                            {% if item.student_count == 0 %}
+                                            <div class="modal fade text-start" id="deleteGoalModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow rounded-4">
+                                                        <form method="POST" action="{{ url_for('admin.career_goal_delete', goal_id=item.id) }}">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold text-danger">Confirm Deletion</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body py-4">
+                                                                <p class="mb-0">Are you sure you want to permanently delete career goal <strong>"{{ item.goal_name }}"</strong>? This action cannot be undone.</p>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-danger rounded-pill px-4">Delete Permanently</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="bi bi-compass fs-1 d-block mb-2"></i>
+                                                <h6 class="fw-semibold">No career goals defined</h6>
+                                                <p class="small mb-3">Add target career trajectories to enable intelligent pathway recommendations.</p>
+                                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                                                    Add First Career Goal
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Goal Modal -->
+<div class="modal fade" id="addGoalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <form method="POST" action="{{ url_for('admin.career_goals') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-plus-circle text-primary me-2"></i>Add New Career Goal
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Career Goal Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="goal_name" placeholder="e.g. Full Stack Engineer, AI Research Scientist" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Core competencies, industry requirements, and responsibilities..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Create Career Goal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

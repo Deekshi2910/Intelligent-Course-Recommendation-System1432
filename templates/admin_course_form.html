@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Course: ' + course.course_code if course else 'Add New Course' }} - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            {% with active_page='courses' %}
+                {% include 'components/admin_sidebar.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-1">
+                            <li class="breadcrumb-item"><a href="{{ url_for('admin.courses') }}" class="text-decoration-none">Course Catalog</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ 'Edit Course' if course else 'Add Course' }}</li>
+                        </ol>
+                    </nav>
+                    <h2 class="h3 fw-bold text-dark mb-0">
+                        <i class="bi bi-{{ 'pencil-square' if course else 'plus-circle' }} me-2 text-primary"></i>
+                        {{ 'Edit Course: ' + course.course_code if course else 'Add New Course' }}
+                    </h2>
+                </div>
+                <a href="{{ url_for('admin.courses') }}" class="btn btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Courses
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('admin.courses_edit', course_id=course.id) if course else url_for('admin.courses_add') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-info-circle me-2"></i>Basic Course Details
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="course_code" class="form-label fw-semibold">Course Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="course_code" name="course_code" 
+                                       placeholder="e.g. CS-401" value="{{ course.course_code if course else '' }}" required>
+                                <div class="form-text">Unique departmental course identifier.</div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <label for="course_name" class="form-label fw-semibold">Course Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="course_name" name="course_name" 
+                                       placeholder="e.g. Machine Learning & Predictive Modeling" value="{{ course.course_name if course else '' }}" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="description" class="form-label fw-semibold">Course Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="3" 
+                                          placeholder="Detailed curriculum overview, core concepts and learning outcomes..." required>{{ course.description if course else '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-mortarboard me-2"></i>Academic Requirements & Difficulty
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="minimum_cgpa" class="form-label fw-semibold">Minimum CGPA Required</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-bar-chart"></i></span>
+                                    <input type="number" step="0.01" min="0.0" max="4.0" class="form-control" id="minimum_cgpa" 
+                                           name="minimum_cgpa" value="{{ course.minimum_cgpa if course else '2.00' }}">
+                                </div>
+                                <div class="form-text">Minimum CGPA required for eligibility (0.00 - 4.00).</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="difficulty_level" class="form-label fw-semibold">Difficulty Level <span class="text-danger">*</span></label>
+                                <select class="form-select" id="difficulty_level" name="difficulty_level" required>
+                                    <option value="Beginner" {% if course and course.difficulty_level == 'Beginner' %}selected{% endif %}>Beginner</option>
+                                    <option value="Intermediate" {% if (course and course.difficulty_level == 'Intermediate') or not course %}selected{% endif %}>Intermediate</option>
+                                    <option value="Advanced" {% if course and course.difficulty_level == 'Advanced' %}selected{% endif %}>Advanced</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold d-block">Catalog Availability</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="is_active" name="is_active" value="1" 
+                                           {% if not course or course.is_active %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="is_active">Active in Offerings</label>
+                                </div>
+                                <div class="form-text">Inactive courses are hidden from student recommendations.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="prerequisites" class="form-label fw-semibold">Prerequisites</label>
+                                <textarea class="form-control" id="prerequisites" name="prerequisites" rows="2" 
+                                          placeholder="e.g. Data Structures, Linear Algebra, or None">{{ course.prerequisites if course else '' }}</textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="career_scope" class="form-label fw-semibold">Career Scope / Job Roles</label>
+                                <textarea class="form-control" id="career_scope" name="career_scope" rows="2" 
+                                          placeholder="e.g. Machine Learning Engineer, Data Analyst, Research Scientist">{{ course.career_scope if course else '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-tags me-2"></i>Associated Domain Interests
+                        </h5>
+
+                        <div class="mb-4">
+                            <p class="text-muted small mb-2">Check all knowledge domains and student interest topics associated with this course:</p>
+                            <div class="row g-2 p-3 bg-light rounded-3 border">
+                                {% for interest in all_interests %}
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="interest_ids" 
+                                               value="{{ interest.id }}" id="interest_{{ interest.id }}"
+                                               {% if interest.id in selected_interest_ids %}checked{% endif %}>
+                                        <label class="form-check-label text-dark" for="interest_{{ interest.id }}">
+                                            {{ interest.interest_name }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-compass me-2"></i>Associated Career Pathways
+                        </h5>
+
+                        <div class="mb-4">
+                            <p class="text-muted small mb-2">Select professional career pathways aligned with this course offering:</p>
+                            <div class="row g-2 p-3 bg-light rounded-3 border">
+                                {% for goal in all_career_goals %}
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="career_goal_ids" 
+                                               value="{{ goal.id }}" id="goal_{{ goal.id }}"
+                                               {% if selected_career_goal_ids and goal.id in selected_career_goal_ids %}checked{% endif %}>
+                                        <label class="form-check-label text-dark" for="goal_{{ goal.id }}">
+                                            {{ goal.goal_name }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-primary mb-3 pb-2 border-bottom">
+                            <i class="bi bi-diagram-2 me-2"></i>Structured Prerequisite Courses
+                        </h5>
+
+                        <div class="mb-4">
+                            <p class="text-muted small mb-2">Check courses that must be completed prior to enrolling in this course:</p>
+                            <div class="row g-2 p-3 bg-light rounded-3 border">
+                                {% if all_other_courses %}
+                                    {% for o_course in all_other_courses %}
+                                    <div class="col-md-4 col-sm-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="prerequisite_course_ids" 
+                                                   value="{{ o_course.id }}" id="prereq_course_{{ o_course.id }}"
+                                                   {% if selected_prereq_ids and o_course.id in selected_prereq_ids %}checked{% endif %}>
+                                            <label class="form-check-label text-dark" for="prereq_course_{{ o_course.id }}">
+                                                <span class="badge bg-secondary-subtle text-secondary me-1">{{ o_course.course_code }}</span>
+                                                {{ o_course.course_name }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="col-12 text-muted small fst-italic">No other courses available to set as prerequisites.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('admin.courses') }}" class="btn btn-light rounded-pill px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                <i class="bi bi-check-circle me-1"></i> {{ 'Update Course' if course else 'Create Course' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

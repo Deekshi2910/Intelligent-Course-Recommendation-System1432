@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}AI Knowledge Rules - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            {% with active_page='rules' %}
+                {% include 'components/admin_sidebar.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">
+                        <i class="bi bi-diagram-3-fill me-2 text-primary"></i>AI Inference Knowledge Rules
+                    </h2>
+                    <p class="text-muted mb-0">Declarative reasoning rules utilized by the forward-chaining inference engine.</p>
+                </div>
+                <a href="{{ url_for('admin.rules_add') }}" class="btn btn-primary rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Create New AI Rule
+                </a>
+            </div>
+
+            <!-- Rules Table Card -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        Configured Production Rules
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill ms-2">{{ rules|length }} Rules</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4" style="width: 80px;">Priority</th>
+                                    <th style="min-width: 180px;">Rule Identifier</th>
+                                    <th style="min-width: 180px;">Recommended Course</th>
+                                    <th>Antecedent Conditions (IF) & Consequent Rationale (THEN)</th>
+                                    <th class="text-center" style="width: 110px;">Status</th>
+                                    <th class="text-end pe-4" style="width: 140px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if rules %}
+                                    {% for rule in rules %}
+                                    <tr class="{% if not rule.is_active %}table-light opacity-75{% endif %}">
+                                        <td class="ps-4">
+                                            {% if rule.priority >= 8 %}
+                                                <span class="badge bg-danger rounded-pill px-2 py-1">P-{{ rule.priority }}</span>
+                                            {% elif rule.priority >= 5 %}
+                                                <span class="badge bg-primary rounded-pill px-2 py-1">P-{{ rule.priority }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary rounded-pill px-2 py-1">P-{{ rule.priority }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-dark d-block">{{ rule.rule_name }}</span>
+                                            <span class="text-muted small">Rule #{{ rule.id }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-dark rounded-pill me-1">{{ rule.course_code }}</span>
+                                            <div class="fw-semibold small text-dark mt-1">{{ rule.course_name }}</div>
+                                        </td>
+                                        <td>
+                                            {% if rule.parsed_conditions.all %}
+                                            <div class="small mb-1">
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-1 fw-bold">AND (all)</span>
+                                                {% for p in rule.parsed_conditions.all %}
+                                                    <span class="badge bg-light text-dark border me-1">{{ p.field }} {{ p.operator }} {{ p.value }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+
+                                            {% if rule.parsed_conditions.any %}
+                                            <div class="small mb-1">
+                                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle me-1 fw-bold">OR (any)</span>
+                                                {% for p in rule.parsed_conditions.any %}
+                                                    <span class="badge bg-light text-dark border me-1">{{ p.field }} {{ p.operator }} {{ p.value }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+
+                                            <div class="small mb-1">
+                                                {% if rule.parsed_conditions.min_cgpa and not rule.parsed_conditions.all %}
+                                                    <span class="badge bg-light text-dark border me-1">Min CGPA: {{ rule.parsed_conditions.min_cgpa }}</span>
+                                                {% endif %}
+                                                {% if rule.parsed_conditions.min_semester and not rule.parsed_conditions.all %}
+                                                    <span class="badge bg-light text-dark border me-1">Min Sem: {{ rule.parsed_conditions.min_semester }}</span>
+                                                {% endif %}
+                                            </div>
+
+                                            {% if rule.parsed_conditions.required_interests and not rule.parsed_conditions.any %}
+                                            <div class="small mb-1">
+                                                <span class="text-muted fw-semibold">Interests:</span>
+                                                {% for interest in rule.parsed_conditions.required_interests %}
+                                                    <span class="badge bg-info-subtle text-info border border-info-subtle me-1">{{ interest }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+
+                                            {% if rule.parsed_conditions.preferred_career_goals and not rule.parsed_conditions.any %}
+                                            <div class="small mb-1">
+                                                <span class="text-muted fw-semibold">Career:</span>
+                                                {% for goal in rule.parsed_conditions.preferred_career_goals %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle me-1">{{ goal }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+
+                                            {% if rule.parsed_conditions.rationale %}
+                                            <div class="small text-muted mt-1 fst-italic">
+                                                <i class="bi bi-chat-left-quote me-1"></i>"{{ rule.parsed_conditions.rationale }}"
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if rule.is_active %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="btn-group btn-group-sm">
+                                                <!-- Toggle Active Form -->
+                                                <form method="POST" action="{{ url_for('admin.rule_toggle', rule_id=rule.id) }}" class="d-inline">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="btn btn-outline-{{ 'warning' if rule.is_active else 'success' }}" 
+                                                            title="{{ 'Deactivate Rule' if rule.is_active else 'Activate Rule' }}">
+                                                        <i class="bi bi-power"></i>
+                                                    </button>
+                                                </form>
+
+                                                <!-- Edit Rule Link -->
+                                                <a href="{{ url_for('admin.rules_edit', rule_id=rule.id) }}" class="btn btn-outline-secondary" title="Edit Rule">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+
+                                                <!-- Delete Rule Button -->
+                                                <button type="button" class="btn btn-outline-danger" title="Delete Rule"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteRuleModal{{ rule.id }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- Delete Modal -->
+                                            <div class="modal fade text-start" id="deleteRuleModal{{ rule.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow rounded-4">
+                                                        <form method="POST" action="{{ url_for('admin.rule_delete', rule_id=rule.id) }}">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold text-danger">Delete AI Knowledge Rule</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body py-4">
+                                                                <p class="mb-0">Are you sure you want to permanently delete rule <strong>"{{ rule.rule_name }}"</strong>? The inference engine will no longer evaluate this rule.</p>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-danger rounded-pill px-4">Delete Permanently</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="bi bi-diagram-3 fs-1 d-block mb-2"></i>
+                                                <h6 class="fw-semibold">No AI knowledge rules configured</h6>
+                                                <p class="small mb-3">Define rule-based antecedents and consequences to drive the recommendation inference engine.</p>
+                                                <a href="{{ url_for('admin.rules_add') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                                    Create First Rule
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

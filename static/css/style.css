@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Intelligent Course Recommendation System - Custom Styles
+   ========================================================================== */
+
+:root {
+    --primary-color: #0d6efd;
+    --primary-hover: #0b5ed7;
+    --background-color: #f8f9fa;
+    --card-border-radius: 1rem;
+}
+
+body {
+    background-color: var(--background-color);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+    border-radius: var(--card-border-radius);
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.badge {
+    letter-spacing: 0.3px;
+}
+
+code {
+    font-size: 0.825rem;
+}

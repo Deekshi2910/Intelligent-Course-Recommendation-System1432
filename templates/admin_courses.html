@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Course Management — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-dark text-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-2">Curriculum Administration</span>
+                <h2 class="fw-bold mb-1"><i class="bi bi-journal-bookmark-fill me-2"></i>Course Management</h2>
+                <p class="mb-0 text-white-50">Create, edit, toggle availability, and assign domain interests to elective courses.</p>
+            </div>
+            <a href="{{ url_for('admin.courses_add') }}" class="btn btn-primary fw-semibold shadow-sm mt-3 mt-md-0">
+                <i class="bi bi-plus-circle me-1"></i>Add New Course
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'courses' %}
+            {% include 'components/admin_sidebar.html' %}
+        </div>
+
+        <!-- Main Column -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0">Elective Courses ({{ courses|length }})</h5>
+                    <span class="badge bg-light text-secondary border">Catalog Table</span>
+                </div>
+                <div class="card-body p-4">
+                    {% if courses %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 small">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Course Name</th>
+                                        <th>Difficulty</th>
+                                        <th>Min CGPA</th>
+                                        <th>Associated Interests</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in courses %}
+                                        <tr>
+                                            <td class="fw-bold text-primary">{{ c.course_code }}</td>
+                                            <td>
+                                                <div class="fw-semibold text-dark">{{ c.course_name }}</div>
+                                                <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">{{ c.description }}</small>
+                                            </td>
+                                            <td>
+                                                {% if c.difficulty_level == 'Advanced' %}
+                                                    <span class="badge bg-danger-subtle text-danger">Advanced</span>
+                                                {% elif c.difficulty_level == 'Intermediate' %}
+                                                    <span class="badge bg-primary-subtle text-primary">Intermediate</span>
+                                                {% else %}
+                                                    <span class="badge bg-success-subtle text-success">Beginner</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ "%.2f"|format(c.minimum_cgpa) }}</td>
+                                            <td>
+                                                {% if c.tags %}
+                                                    <small class="text-secondary">{{ c.tags }}</small>
+                                                {% else %}
+                                                    <span class="text-muted fst-italic">None</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if c.is_active %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('admin.courses_edit', course_id=c.id) }}" class="btn btn-outline-primary" title="Edit Course">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form method="POST" action="{{ url_for('admin.course_toggle_status', course_id=c.id) }}" class="d-inline">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                        <button type="submit" class="btn btn-outline-{{ 'warning' if c.is_active else 'success' }}" 
+                                                                title="{{ 'Deactivate Course' if c.is_active else 'Activate Course' }}">
+                                                            <i class="bi bi-{{ 'slash-circle' if c.is_active else 'check-circle' }}"></i>
+                                                        </button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCourseModal{{ c.id }}" title="Delete Course">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Delete Confirmation Modal -->
+                                                <div class="modal fade" id="deleteCourseModal{{ c.id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content rounded-4 border-0">
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold text-dark">Delete Course: {{ c.course_code }}?</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body text-start">
+                                                                <p class="text-secondary small mb-2">
+                                                                    Are you sure you want to delete <strong>{{ c.course_name }}</strong>?
+                                                                </p>
+                                                                <div class="alert alert-warning small mb-0">
+                                                                    <i class="bi bi-shield-exclamation me-1"></i>
+                                                                    <strong>Safe Deletion Policy:</strong> If this course has existing student recommendations, it will be automatically <strong>deactivated</strong> instead of deleted to protect historical recommendation audit trails.
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                                <form method="POST" action="{{ url_for('admin.course_delete', course_id=c.id) }}" class="d-inline">
+                                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                                    <button type="submit" class="btn btn-danger btn-sm">Confirm Delete / Deactivate</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-journal-x text-muted fs-1 mb-2"></i>
+                            <h6 class="fw-bold text-secondary">No Elective Courses Found</h6>
+                            <p class="text-muted small mb-3">Add new courses to populate the recommendation knowledge base.</p>
+                            <a href="{{ url_for('admin.courses_add') }}" class="btn btn-primary btn-sm px-3">Add First Course</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+<!-- Reusable Administrator Sidebar Navigation -->
+<div class="dashboard-sidebar shadow-sm border-0 rounded-4 p-3 bg-white mb-4">
+    <div class="text-center pb-3 border-bottom mb-3">
+        <div class="bg-dark text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 60px; height: 60px;">
+            <i class="bi bi-shield-lock-fill fs-3 text-warning"></i>
+        </div>
+        <h6 class="fw-bold mb-0 text-dark">{{ session.get('username') }}</h6>
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle mt-1 px-3 py-1 rounded-pill">
+            Administrator
+        </span>
+    </div>
+    
+    <nav class="nav flex-column dashboard-nav">
+        <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+            <i class="bi bi-speedometer2"></i>Overview
+        </a>
+        <a class="nav-link {% if active_page == 'students' %}active{% endif %}" href="{{ url_for('admin.students') }}">
+            <i class="bi bi-people-fill"></i>Student Management
+        </a>
+        <a class="nav-link {% if active_page == 'courses' %}active{% endif %}" href="{{ url_for('admin.courses') }}">
+            <i class="bi bi-journal-bookmark-fill"></i>Course Management
+        </a>
+        <a class="nav-link {% if active_page == 'interests' %}active{% endif %}" href="{{ url_for('admin.interests') }}">
+            <i class="bi bi-tags-fill"></i>Domain Interests
+        </a>
+        <a class="nav-link {% if active_page == 'career_goals' %}active{% endif %}" href="{{ url_for('admin.career_goals') }}">
+            <i class="bi bi-compass-fill"></i>Career Goals
+        </a>
+        <a class="nav-link {% if active_page == 'knowledge_base' %}active{% endif %}" href="{{ url_for('admin.knowledge_base') }}">
+            <i class="bi bi-database-fill-gear"></i>Knowledge Base
+        </a>
+        <a class="nav-link {% if active_page == 'rules' %}active{% endif %}" href="{{ url_for('admin.rules') }}">
+            <i class="bi bi-diagram-3-fill"></i>AI Rules
+        </a>
+        <a class="nav-link {% if active_page == 'default_rules' %}active{% endif %}" href="{{ url_for('admin.default_rules_view') }}">
+            <i class="bi bi-arrow-repeat"></i>Default Rules (DR01-05)
+        </a>
+        <a class="nav-link {% if active_page == 'reports' %}active{% endif %}" href="{{ url_for('admin.reports') }}">
+            <i class="bi bi-graph-up-arrow"></i>Recommendation Reports
+        </a>
+        <a class="nav-link {% if active_page == 'profile' %}active{% endif %}" href="{{ url_for('admin.profile') }}">
+            <i class="bi bi-person-gear"></i>Admin Profile
+        </a>
+        <hr class="my-2">
+        <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+            <i class="bi bi-box-arrow-right text-danger"></i>Logout
+        </a>
+    </nav>
+</div>

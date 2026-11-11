@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendation Monitoring & Reports - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            {% with active_page='reports' %}
+                {% include 'components/admin_sidebar.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">
+                        <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Recommendation Monitoring & Audit Reports
+                    </h2>
+                    <p class="text-muted mb-0">Track AI reasoning outcomes, distribution metrics, and student elective interest trends.</p>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary-subtle text-primary rounded-3 p-3 me-3">
+                                <i class="bi bi-cpu fs-3"></i>
+                            </div>
+                            <div>
+                                <span class="text-muted small fw-semibold">Total Recommendations</span>
+                                <h3 class="fw-bold mb-0 text-dark">{{ total_recommendations }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success-subtle text-success rounded-3 p-3 me-3">
+                                <i class="bi bi-people-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <span class="text-muted small fw-semibold">Students Advised</span>
+                                <h3 class="fw-bold mb-0 text-dark">{{ total_students_advised }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning-subtle text-warning rounded-3 p-3 me-3">
+                                <i class="bi bi-star-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <span class="text-muted small fw-semibold">Avg Match Score</span>
+                                <h3 class="fw-bold mb-0 text-dark">{{ avg_score }}%</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info-subtle text-info rounded-3 p-3 me-3">
+                                <i class="bi bi-journal-check fs-3"></i>
+                            </div>
+                            <div>
+                                <span class="text-muted small fw-semibold">Unique Electives</span>
+                                <h3 class="fw-bold mb-0 text-dark">{{ unique_courses_recommended }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Distribution Analytics -->
+            <div class="row g-4 mb-4">
+                <!-- Most Frequently Recommended Courses -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-bar-chart-fill text-primary me-2"></i>Most Frequently Recommended
+                            </h5>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            {% if top_courses %}
+                                <div class="d-flex flex-column gap-3">
+                                    {% for c in top_courses %}
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="fw-bold text-dark small">
+                                                <span class="badge bg-dark rounded-pill me-1">{{ c.course_code }}</span>
+                                                {{ c.course_name }}
+                                            </div>
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                                {{ c.rec_count }} ({{ c.percentage }}%)
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ c.percentage }}%;"></div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted small">
+                                    <p class="mb-0">No course recommendation data recorded yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suitability Score Distribution & Frequent Rules -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-pie-chart-fill text-success me-2"></i>Score Distribution & Rules
+                            </h5>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <h6 class="fw-semibold text-muted small mb-2">Recommendation Score Tiers</h6>
+                            <div class="row g-2 text-center mb-3 small">
+                                <div class="col">
+                                    <div class="p-2 bg-light rounded border">
+                                        <span class="text-muted d-block">&ge;90%</span>
+                                        <strong class="text-success">{{ score_distribution.bucket_90_100 or 0 }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-2 bg-light rounded border">
+                                        <span class="text-muted d-block">80-89%</span>
+                                        <strong class="text-primary">{{ score_distribution.bucket_80_89 or 0 }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-2 bg-light rounded border">
+                                        <span class="text-muted d-block">70-79%</span>
+                                        <strong class="text-info">{{ score_distribution.bucket_70_79 or 0 }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-2 bg-light rounded border">
+                                        <span class="text-muted d-block">60-69%</span>
+                                        <strong class="text-warning">{{ score_distribution.bucket_60_69 or 0 }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-2 bg-light rounded border">
+                                        <span class="text-muted d-block">&lt;60%</span>
+                                        <strong class="text-secondary">{{ score_distribution.bucket_below_60 or 0 }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-semibold text-muted small mb-2">Frequently Fired AI Knowledge Rules</h6>
+                            {% if frequent_rules %}
+                                <div class="d-flex flex-column gap-2">
+                                    {% for r in frequent_rules %}
+                                        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded border small">
+                                            <div>
+                                                <strong>{{ r.rule_name }}</strong>
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill ms-1">Priority {{ r.priority }}</span>
+                                                <div class="text-muted" style="font-size: 0.75rem;">Suggests {{ r.course_code }}</div>
+                                            </div>
+                                            <span class="badge bg-dark rounded-pill">{{ r.match_count }} matches</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-2 text-muted small">No rule firing activity recorded yet.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Recommendation Activity -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-clock-history text-primary me-2"></i>Recent Recommendation Audit Log
+                    </h5>
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1">
+                        Latest {{ recent_recommendations|length }} Records
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4" style="width: 160px;">Date & Time</th>
+                                    <th style="min-width: 160px;">Student</th>
+                                    <th style="min-width: 180px;">Recommended Course</th>
+                                    <th class="text-center" style="width: 110px;">Score</th>
+                                    <th>Inference Engine Explanation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_recommendations %}
+                                    {% for rec in recent_recommendations %}
+                                    <tr>
+                                        <td class="ps-4 text-muted small">
+                                            {{ rec.created_at.strftime('%Y-%m-%d %H:%M') if rec.created_at else 'Recent' }}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('admin.student_detail', student_id=rec.student_id) }}" class="fw-bold text-dark text-decoration-none">
+                                                {{ rec.full_name }}
+                                            </a>
+                                            <span class="badge bg-light text-secondary border d-block mt-1" style="width: fit-content;">{{ rec.roll_number }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-dark rounded-pill me-1">{{ rec.course_code }}</span>
+                                            <span class="fw-semibold text-dark small d-block mt-1">{{ rec.course_name }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                                                {{ rec.recommendation_score }}%
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="small text-muted fst-italic">
+                                                <i class="bi bi-chat-quote me-1"></i>"{{ rec.reasoning }}"
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="bi bi-clipboard2-x fs-1 d-block mb-2"></i>
+                                                <h6 class="fw-semibold">No recommendation history records found</h6>
+                                                <p class="small mb-0">As students request AI course suggestions, audit logs and statistics will automatically appear here.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

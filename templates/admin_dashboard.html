@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — Course Recommendation System{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-dark text-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-2">
+                    <i class="bi bi-shield-lock-fill me-1"></i>Administrator Command Center
+                </span>
+                <h2 class="fw-bold mb-1">System Overview & Analytics</h2>
+                <p class="mb-0 text-white-50">Manage curriculum rules, monitor recommendations, and administer student records.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 mt-md-0">
+                <a href="{{ url_for('admin.courses_add') }}" class="btn btn-primary fw-semibold shadow-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Add Course
+                </a>
+                <a href="{{ url_for('admin.rules_add') }}" class="btn btn-outline-light fw-semibold">
+                    <i class="bi bi-plus-circle me-1"></i>Add Rule
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6 Statistics Metrics Cards -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Registered Students -->
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary-subtle text-primary rounded-3 p-3 me-3">
+                        <i class="bi bi-people-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Total Students</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_students }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 2. Active Courses -->
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success-subtle text-success rounded-3 p-3 me-3">
+                        <i class="bi bi-book-half fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Active Courses</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_courses }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 3. Available Interests -->
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning-subtle text-warning rounded-3 p-3 me-3">
+                        <i class="bi bi-tags-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Interests</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_interests }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 4. Career Goals -->
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info-subtle text-info rounded-3 p-3 me-3">
+                        <i class="bi bi-compass-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Career Goals</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_goals }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 5. Active AI Rules -->
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-danger-subtle text-danger rounded-3 p-3 me-3">
+                        <i class="bi bi-diagram-3-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">AI Rules</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_rules }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 6. Recommendations Generated -->
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-secondary-subtle text-secondary rounded-3 p-3 me-3">
+                        <i class="bi bi-graph-up-arrow fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Recs Given</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_recommendations }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'dashboard' %}
+            {% include 'components/admin_sidebar.html' %}
+        </div>
+
+        <!-- Main Content Column -->
+        <div class="col-lg-9">
+            <!-- Recent Students Summary Table -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-people text-primary me-2"></i>Recently Registered Students</h5>
+                    <a href="{{ url_for('admin.students') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        View All ({{ total_students }})
+                    </a>
+                </div>
+                <div class="card-body px-4">
+                    {% if recent_students %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 small">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Roll Number</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Semester</th>
+                                        <th>CGPA</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in recent_students %}
+                                        <tr>
+                                            <td class="fw-bold text-primary">{{ s.roll_number }}</td>
+                                            <td>{{ s.full_name }}</td>
+                                            <td>{{ s.department }}</td>
+                                            <td>Sem {{ s.semester }}</td>
+                                            <td><span class="badge bg-success-subtle text-success">{{ "%.2f"|format(s.cgpa) }}</span></td>
+                                            <td>
+                                                {% if s.is_active %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Deactivated</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('admin.student_detail', student_id=s.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted small">No students registered yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Action Shortcuts -->
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100 text-center">
+                        <i class="bi bi-journal-plus text-primary fs-1 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Elective Courses Catalog</h6>
+                        <p class="text-muted small mb-3">Add, edit, or toggle elective course eligibility prerequisites.</p>
+                        <a href="{{ url_for('admin.courses') }}" class="btn btn-outline-primary btn-sm mt-auto">Manage Courses</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100 text-center">
+                        <i class="bi bi-diagram-3 text-warning fs-1 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Inference Engine Knowledge Rules</h6>
+                        <p class="text-muted small mb-3">Configure structured rules and priorities for course suggestions.</p>
+                        <a href="{{ url_for('admin.rules') }}" class="btn btn-outline-warning btn-sm mt-auto">Manage Rules</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white h-100 text-center">
+                        <i class="bi bi-graph-up text-success fs-1 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Recommendation Reports</h6>
+                        <p class="text-muted small mb-3">Monitor course recommendation distributions and student logs.</p>
+                        <a href="{{ url_for('admin.reports') }}" class="btn btn-outline-success btn-sm mt-auto">View Analytics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

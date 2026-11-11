@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}AI Course Recommendations — Intelligent Course Recommendation System{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Top Welcome Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-primary text-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Phase 9 • AI Inference Engine</span>
+                <h2 class="fw-bold mb-1"><i class="bi bi-robot me-2"></i>Intelligent Course Recommendations</h2>
+                <p class="mb-0 text-white-50">Deductive forward-chaining rules, multi-factor suitability scoring, and explainable AI justifications.</p>
+            </div>
+            <div class="mt-3 mt-md-0 d-flex gap-2">
+                <a href="{{ url_for('student.history') }}" class="btn btn-outline-light fw-semibold">
+                    <i class="bi bi-clock-history me-1"></i>View History
+                </a>
+                <a href="{{ url_for('student.dashboard') }}" class="btn btn-light text-primary fw-semibold">
+                    <i class="bi bi-arrow-left me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'recommendations' %}
+            {% include 'components/student_sidebar.html' %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+            <!-- Student Profile Staging Card -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Active Academic Staging Profile</h5>
+                        <a href="{{ url_for('student.profile') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                            <i class="bi bi-pencil me-1"></i>Edit Profile
+                        </a>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <span class="text-muted small d-block">Current Standing</span>
+                                <strong class="fs-5 text-dark">Semester {{ profile.semester }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <span class="text-muted small d-block">Cumulative GPA</span>
+                                <strong class="fs-5 text-dark">{{ "%.2f"|format(profile.cgpa) }} / 10.00</strong>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <span class="text-muted small d-block">Technical Interests</span>
+                                <strong class="fs-5 text-primary">{{ student_interests|length }} Topics</strong>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <span class="text-muted small d-block">Target Career Goal</span>
+                                <strong class="fs-6 text-dark text-truncate d-block" title="{{ profile.career_goal_name or 'Not declared' }}">
+                                    {{ profile.career_goal_name or 'Not declared' }}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Recommendations Trigger Button -->
+                    <div class="text-center mt-4 pt-2">
+                        <form method="POST" action="{{ url_for('student.recommendations') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm rounded-pill fw-semibold">
+                                <i class="bi bi-lightning-charge-fill me-2"></i>Generate AI Recommendations
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECOMMENDATIONS RESULT SECTION (When Generated) -->
+            {% if recommendation_results %}
+                <!-- Executive Summary Box -->
+                <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-stars text-warning fs-4 me-2"></i>
+                            <h5 class="fw-bold mb-0 text-dark">AI Inference Executive Summary</h5>
+                        </div>
+                        <p class="mb-2 text-dark">{{ recommendation_results.summary }}</p>
+                        
+                        <!-- Applied Defaults or Warnings -->
+                        {% if recommendation_results.is_default_reasoning_used %}
+                            <div class="alert alert-info py-2 px-3 mb-0 mt-3 d-flex align-items-center small">
+                                <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                                <div>
+                                    <strong>Default Reasoning Engaged:</strong> 
+                                    Applied fallback rules: {{ recommendation_results.applied_default_rules|join(', ') }}.
+                                    {% for msg in recommendation_results.clarification_messages %}
+                                        <div class="mt-1 text-muted">{{ msg }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if recommendation_results.academic_info_required %}
+                            <div class="alert alert-warning py-2 px-3 mb-0 mt-3 small">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Academic Information Required (DR04):</strong> CGPA is missing or unverified. Please update your profile.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Ranked Recommendations List -->
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-award text-success me-2"></i>Ranked Course Recommendations ({{ recommendation_results.recommendations|length }})
+                </h5>
+
+                {% if recommendation_results.recommendations %}
+                    <div class="row g-4 mb-4">
+                        {% for rec in recommendation_results.recommendations %}
+                            <div class="col-12">
+                                <div class="card shadow-sm border-0 rounded-4 h-100 hover-shadow transition">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                    <span class="badge bg-dark rounded-pill px-3 py-1">Rank #{{ rec.rank }}</span>
+                                                    <span class="badge {{ rec.tier_badge_class }} rounded-pill px-3 py-1">{{ rec.recommendation_tier }}</span>
+                                                    <span class="badge bg-light text-muted border rounded-pill">{{ rec.difficulty_level }}</span>
+                                                </div>
+                                                <h4 class="fw-bold text-dark mb-1">
+                                                    <span class="text-primary">{{ rec.course_code }}</span>: {{ rec.course_name }}
+                                                </h4>
+                                            </div>
+                                            <!-- Suitability Score Gauge -->
+                                            <div class="text-end">
+                                                <div class="fs-2 fw-bold text-primary">{{ rec.suitability_score }}%</div>
+                                                <span class="text-muted small">Suitability Score</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Multi-Factor Scoring Progress Breakdown -->
+                                        {% if rec.score_breakdown %}
+                                            <div class="bg-light p-3 rounded-3 mb-3">
+                                                <span class="fw-semibold small text-muted d-block mb-2">Scoring Breakdown (Weighted Formula: 40% Interest, 35% Career, 15% CGPA, 10% Prerequisite)</span>
+                                                <div class="row g-2 text-center small">
+                                                    <div class="col-3">
+                                                        <div class="text-muted">Interest Match (40%)</div>
+                                                        <div class="fw-bold text-dark">{{ rec.score_breakdown.interest_match }}%</div>
+                                                        <div class="progress mt-1" style="height: 6px;">
+                                                            <div class="progress-bar bg-primary" style="width: {{ rec.score_breakdown.interest_match }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="text-muted">Career Match (35%)</div>
+                                                        <div class="fw-bold text-dark">{{ rec.score_breakdown.career_match }}%</div>
+                                                        <div class="progress mt-1" style="height: 6px;">
+                                                            <div class="progress-bar bg-success" style="width: {{ rec.score_breakdown.career_match }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="text-muted">CGPA Margin (15%)</div>
+                                                        <div class="fw-bold text-dark">{{ rec.score_breakdown.cgpa_readiness }}%</div>
+                                                        <div class="progress mt-1" style="height: 6px;">
+                                                            <div class="progress-bar bg-info" style="width: {{ rec.score_breakdown.cgpa_readiness }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="text-muted">Prerequisites (10%)</div>
+                                                        <div class="fw-bold text-dark">{{ rec.score_breakdown.prerequisite_match }}%</div>
+                                                        <div class="progress mt-1" style="height: 6px;">
+                                                            <div class="progress-bar bg-warning" style="width: {{ rec.score_breakdown.prerequisite_match }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Explainable AI Justification -->
+                                        <div class="border-start border-3 border-primary ps-3 my-3">
+                                            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-chat-quote-fill text-primary me-2"></i>AI Recommendation Rationale:</h6>
+                                            <p class="text-secondary mb-0 small">{{ rec.explanation }}</p>
+                                        </div>
+
+                                        <!-- Tags & Attributes -->
+                                        <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
+                                            <span class="small text-muted me-1 align-self-center"><i class="bi bi-tags me-1"></i>Tags:</span>
+                                            {% for interest in rec.course_interests %}
+                                                <span class="badge bg-light text-dark border">{{ interest }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info p-4 rounded-4 text-center">
+                        <i class="bi bi-info-circle fs-3 text-info d-block mb-2"></i>
+                        <h6 class="fw-bold">No eligible courses matched your current criteria.</h6>
+                        <p class="text-muted small mb-0">Consider updating your profile interests, declaring a career goal, or checking academic prerequisites.</p>
+                    </div>
+                {% endif %}
+
+                <!-- Excluded / Ineligible Courses Accordion -->
+                {% if recommendation_results.rejected_courses %}
+                    <div class="accordion border-0 shadow-sm rounded-4 mb-4" id="excludedAccordion">
+                        <div class="accordion-item border-0 rounded-4">
+                            <h2 class="accordion-header" id="headingExcluded">
+                                <button class="accordion-button collapsed rounded-4 bg-light text-secondary fw-semibold small" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExcluded" aria-expanded="false" aria-controls="collapseExcluded">
+                                    <i class="bi bi-shield-x me-2 text-danger"></i>View Ineligible & Excluded Courses ({{ recommendation_results.rejected_courses|length }})
+                                </button>
+                            </h2>
+                            <div id="collapseExcluded" class="accordion-collapse collapse" aria-labelledby="headingExcluded" data-bs-parent="#excludedAccordion">
+                                <div class="accordion-body p-4">
+                                    <p class="small text-muted mb-3">These courses were excluded due to mandatory academic eligibility constraints (e.g., minimum CGPA requirements or uncompleted prerequisites):</p>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle small mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Course</th>
+                                                    <th>Exclusion Reason</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for rej in recommendation_results.rejected_courses %}
+                                                    <tr>
+                                                        <td><strong>{{ rej.course_code }}</strong>: {{ rej.course_name }}</td>
+                                                        <td class="text-danger">{{ rej.reasons|join('; ') }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+            <!-- RECENT HISTORY PREVIEW (On initial GET) -->
+            {% elif recent_history %}
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Your Previously Generated Recommendations</h5>
+                        <a href="{{ url_for('student.history') }}" class="btn btn-sm btn-link text-decoration-none">Full History &rarr;</a>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            {% for item in recent_history %}
+                                <div class="col-md-6">
+                                    <div class="p-3 border rounded-3 h-100 bg-white">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <strong class="text-primary">{{ item.course_code }}</strong>
+                                            <span class="badge bg-success rounded-pill">{{ item.recommendation_score }}%</span>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-2">{{ item.course_name }}</h6>
+                                        <p class="text-muted small mb-1 text-truncate-2">{{ item.reasoning }}</p>
+                                        <span class="text-muted" style="font-size: 0.75rem;">Generated on {{ item.created_at.strftime('%b %d, %Y') if item.created_at else '' }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- AI Inference Engine Architecture Explainer -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold text-dark mb-1"><i class="bi bi-diagram-3-fill text-primary me-2"></i>How the AI Inference Engine Works</h5>
+                    <p class="text-muted small">Combining forward-chaining deduction, default fallback reasoning, and multi-factor weighted scoring.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="fw-bold text-primary mb-1"><i class="bi bi-arrow-right-circle me-1"></i>1. Rule-Based Reasoning & Forward Chaining</h6>
+                                <p class="small text-muted mb-0">Production rules match student facts (CGPA, semester, interests, career goal) against expert curriculum rules using Match-Resolve-Act iterations.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="fw-bold text-success mb-1"><i class="bi bi-arrow-repeat me-1"></i>2. Default Reasoning (DR01 - DR05)</h6>
+                                <p class="small text-muted mb-0">Handles missing career goals (DR01), missing interests (DR02), or general breadth (DR03). Never invents CGPA (DR04) or prerequisites (DR05).</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="fw-bold text-warning mb-1"><i class="bi bi-shield-check me-1"></i>3. Hard Eligibility Enforcement</h6>
+                                <p class="small text-muted mb-0">Courses failing minimum CGPA or prerequisite criteria are strictly excluded from recommendations, preserving academic integrity.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="fw-bold text-info mb-1"><i class="bi bi-percent me-1"></i>4. Transparent Multi-Factor Scoring</h6>
+                                <p class="small text-muted mb-0">Calculates a composite suitability score: 40% Interest Match, 35% Career Alignment, 15% CGPA Readiness, and 10% Prerequisite Fulfillment.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

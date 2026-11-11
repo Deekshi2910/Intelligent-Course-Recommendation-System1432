@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Domain Interests - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            {% with active_page='interests' %}
+                {% include 'components/admin_sidebar.html' %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">
+                        <i class="bi bi-tags-fill me-2 text-primary"></i>Domain Interests Management
+                    </h2>
+                    <p class="text-muted mb-0">Curate academic disciplines, competencies, and specialization tags.</p>
+                </div>
+                <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addInterestModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add New Interest
+                </button>
+            </div>
+
+            <!-- Interests Table Card -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        Registered Interests
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill ms-2">{{ interests|length }} Total</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4" style="width: 80px;"># ID</th>
+                                    <th>Interest / Skill Domain</th>
+                                    <th class="text-center" style="width: 140px;">Mapped Courses</th>
+                                    <th class="text-center" style="width: 140px;">Selected Students</th>
+                                    <th class="text-end pe-4" style="width: 160px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if interests %}
+                                    {% for item in interests %}
+                                    <tr>
+                                        <td class="ps-4 fw-semibold text-muted">#{{ item.id }}</td>
+                                        <td>
+                                            <span class="fw-bold text-dark">{{ item.interest_name }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1">
+                                                <i class="bi bi-journal-code me-1"></i> {{ item.course_count }} Courses
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+                                                <i class="bi bi-people me-1"></i> {{ item.student_count }} Students
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-secondary" title="Edit Interest"
+                                                        data-bs-toggle="modal" data-bs-target="#editInterestModal{{ item.id }}">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                {% if item.course_count == 0 and item.student_count == 0 %}
+                                                <button type="button" class="btn btn-outline-danger" title="Delete Unused Interest"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteInterestModal{{ item.id }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                {% else %}
+                                                <button type="button" class="btn btn-outline-secondary opacity-50" disabled 
+                                                        title="Cannot delete: in use by courses or students">
+                                                    <i class="bi bi-lock-fill"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+
+                                            <!-- Edit Modal -->
+                                            <div class="modal fade text-start" id="editInterestModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow rounded-4">
+                                                        <form method="POST" action="{{ url_for('admin.interest_edit', interest_id=item.id) }}">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold">Edit Domain Interest</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body py-4">
+                                                                <label class="form-label fw-semibold">Interest Name <span class="text-danger">*</span></label>
+                                                                <input type="text" class="form-control" name="interest_name" value="{{ item.interest_name }}" required>
+                                                                <div class="form-text">Ensure the name is unique and descriptive.</div>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Delete Modal -->
+                                            {% if item.course_count == 0 and item.student_count == 0 %}
+                                            <div class="modal fade text-start" id="deleteInterestModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow rounded-4">
+                                                        <form method="POST" action="{{ url_for('admin.interest_delete', interest_id=item.id) }}">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold text-danger">Confirm Deletion</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body py-4">
+                                                                <p class="mb-0">Are you sure you want to permanently delete interest <strong>"{{ item.interest_name }}"</strong>? This action cannot be undone.</p>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-danger rounded-pill px-4">Delete Permanently</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="bi bi-tag fs-1 d-block mb-2"></i>
+                                                <h6 class="fw-semibold">No domain interests found</h6>
+                                                <p class="small mb-3">Add academic interests to categorize your courses and student preferences.</p>
+                                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addInterestModal">
+                                                    Add First Interest
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Interest Modal -->
+<div class="modal fade" id="addInterestModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <form method="POST" action="{{ url_for('admin.interests') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-plus-circle text-primary me-2"></i>Add New Domain Interest
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <label class="form-label fw-semibold">Interest Title <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="interest_name" placeholder="e.g. Quantum Computing, Embedded Systems" required>
+                    <div class="form-text">Will be available for students to select and for courses to map.</div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Create Interest</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile — Course Recommendation System{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Top Welcome Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-primary text-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Student Account</span>
+                <h2 class="fw-bold mb-1"><i class="bi bi-person-circle me-2"></i>My Student Profile</h2>
+                <p class="mb-0 text-white-50">Review and update your personal and institutional student details.</p>
+            </div>
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-light text-primary fw-semibold mt-3 mt-md-0">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'profile' %}
+            {% include 'components/student_sidebar.html' %}
+        </div>
+
+        <!-- Main Profile Form -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-person-gear text-primary me-2"></i>Profile Information</h5>
+                        <p class="text-muted small mb-0">Update your student name, roll number, department, and standing semester.</p>
+                    </div>
+                    <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill">
+                        Role: {{ profile.role|capitalize }}
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('student.profile') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="full_name" class="form-label fw-semibold small">Full Name</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ profile.full_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="roll_number" class="form-label fw-semibold small">Roll / Student ID</label>
+                                <input type="text" class="form-control" id="roll_number" name="roll_number" value="{{ profile.roll_number }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="department" class="form-label fw-semibold small">Department</label>
+                                <select class="form-select" id="department" name="department" required>
+                                    {% for dept in ['Computer Science', 'Software Engineering', 'Data Science', 'Information Technology', 'Artificial Intelligence'] %}
+                                        <option value="{{ dept }}" {% if profile.department == dept %}selected{% endif %}>{{ dept }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="semester" class="form-label fw-semibold small">Current Semester</label>
+                                <select class="form-select" id="semester" name="semester" required>
+                                    {% for sem in range(1, 9) %}
+                                        <option value="{{ sem }}" {% if profile.semester == sem %}selected{% endif %}>Semester {{ sem }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="username" class="form-label fw-semibold small">Account Username</label>
+                                <input type="text" class="form-control bg-light" id="username" value="{{ profile.username }}" readonly>
+                                <div class="form-text small">Usernames are fixed identifiers.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label fw-semibold small">Registered Email Address</label>
+                                <input type="email" class="form-control bg-light" id="email" value="{{ profile.email }}" readonly>
+                                <div class="form-text small">Email cannot be modified directly by students.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i>Save Profile Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

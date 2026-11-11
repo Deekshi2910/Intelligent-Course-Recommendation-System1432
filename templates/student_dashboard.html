@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard — Course Recommendation System{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Top Welcome Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-primary text-white p-4 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Student Portal</span>
+                <h2 class="fw-bold mb-1">Welcome back, {{ profile.full_name if profile else session.get('username') }}!</h2>
+                <p class="mb-0 text-white-50">Review your academic standing, manage domain interests, and access intelligent course recommendations.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{{ url_for('student.recommendations') }}" class="btn btn-light text-primary fw-semibold shadow-sm">
+                    <i class="bi bi-robot me-1"></i>AI Recommendations
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stat KPI Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary-subtle text-primary rounded-3 p-3 me-3">
+                        <i class="bi bi-mortarboard-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Current CGPA</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ "%.2f"|format(profile.cgpa) if profile else "0.00" }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success-subtle text-success rounded-3 p-3 me-3">
+                        <i class="bi bi-calendar-check fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Semester Standing</span>
+                        <h4 class="fw-bold mb-0 text-dark">Semester {{ profile.semester if profile else 1 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning-subtle text-warning rounded-3 p-3 me-3">
+                        <i class="bi bi-tags-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Selected Interests</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ student_interests|length }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-3 bg-white h-100">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info-subtle text-info rounded-3 p-3 me-3">
+                        <i class="bi bi-book-half fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted small fw-semibold">Available Electives</span>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_courses }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'dashboard' %}
+            {% include 'components/student_sidebar.html' %}
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+            <!-- Student Profile Summary -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Academic Profile</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('student.profile') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                            <i class="bi bi-person me-1"></i>Edit Profile
+                        </a>
+                        <a href="{{ url_for('student.academic') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-pencil me-1"></i>Edit Academics
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body px-4">
+                    {% if profile %}
+                        <div class="row g-3 small mb-3">
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">Department</span>
+                                <span class="fw-bold fs-6 text-dark">{{ profile.department }}</span>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">Semester Standing</span>
+                                <span class="fw-bold fs-6 text-dark">Semester {{ profile.semester }}</span>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">Cumulative CGPA</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle fs-6">{{ "%.2f"|format(profile.cgpa) }}</span>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">Roll Number</span>
+                                <span class="fw-bold fs-6 text-dark">{{ profile.roll_number }}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted small d-block">Preferred Career Goal</span>
+                                    <span class="fw-bold text-dark">
+                                        <i class="bi bi-compass text-primary me-1"></i>{{ profile.career_goal_name or 'None Selected' }}
+                                    </span>
+                                </div>
+                                <a href="{{ url_for('student.career_goals') }}" class="btn btn-sm btn-outline-primary">
+                                    Change Goal
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-tags text-primary me-2"></i>Selected Interest Topics</h6>
+                        <a href="{{ url_for('student.interests') }}" class="btn btn-link btn-sm text-primary p-0 text-decoration-none">
+                            <i class="bi bi-pencil-square me-1"></i>Manage Interests
+                        </a>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if student_interests %}
+                            {% for interest in student_interests %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 rounded-pill">
+                                    <i class="bi bi-tag-fill me-1 opacity-50"></i>{{ interest.interest_name }}
+                                </span>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted small mb-0">No interests selected yet. <a href="{{ url_for('student.interests') }}">Choose your domain interests</a> to receive tailored course recommendations.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Recommendation Activity -->
+            <div class="card shadow-sm border-0 rounded-4" id="recommendations-card">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Recent Recommendation Activity</h5>
+                        <p class="text-muted small mb-0">Latest automated course suggestions tailored to your academic profile.</p>
+                    </div>
+                    <a href="{{ url_for('student.history') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-clock-history me-1"></i>View All History
+                    </a>
+                </div>
+                <div class="card-body px-4">
+                    {% if recommendations %}
+                        <div class="list-group list-group-flush">
+                            {% for rec in recommendations %}
+                                <div class="list-group-item px-0 py-3 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <div>
+                                            <h6 class="fw-bold text-primary mb-1">{{ rec.course_code }}: {{ rec.course_name }}</h6>
+                                            <span class="badge bg-secondary-subtle text-secondary me-2">{{ rec.difficulty_level }}</span>
+                                            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ rec.created_at }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-success fs-6 px-3 py-1 rounded-pill">
+                                                Match {{ "%.1f"|format(rec.recommendation_score) }}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="small text-secondary mb-0 bg-light p-2 rounded-2 mt-2">
+                                        <i class="bi bi-cpu text-primary me-1"></i><strong>Reasoning:</strong> {{ rec.reasoning }}
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light text-muted rounded-circle mb-3" style="width: 64px; height: 64px;">
+                                <i class="bi bi-robot fs-3"></i>
+                            </div>
+                            <h6 class="fw-bold text-secondary">No Recommendations Recorded Yet</h6>
+                            <p class="text-muted small mb-3">Ensure you have selected your interests and career goal, then explore recommendations.</p>
+                            <a href="{{ url_for('student.recommendations') }}" class="btn btn-primary btn-sm px-3">
+                                <i class="bi bi-robot me-1"></i>Open Recommendation Engine
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

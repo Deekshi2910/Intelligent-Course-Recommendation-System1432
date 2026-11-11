@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}My Interests — Course Recommendation System{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Top Welcome Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-primary text-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Knowledge Base Input</span>
+                <h2 class="fw-bold mb-1"><i class="bi bi-tags-fill me-2"></i>My Domain Interests</h2>
+                <p class="mb-0 text-white-50">Select subjects and technologies you are eager to learn to activate tailored recommendation rules.</p>
+            </div>
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-light text-primary fw-semibold mt-3 mt-md-0">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'interests' %}
+            {% include 'components/student_sidebar.html' %}
+        </div>
+
+        <!-- Interests Selection Card -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-check2-square text-primary me-2"></i>Manage Selected Interests</h5>
+                        <p class="text-muted small mb-0">Check or uncheck topics to update your active interests list.</p>
+                    </div>
+                    <span class="badge bg-primary rounded-pill px-3 py-2">
+                        Active Selection: <span id="selectedInterestsCount">{{ selected_interest_ids|length }}</span>
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('student.interests') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="row g-3 mb-4">
+                            {% for interest in all_interests %}
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="form-check p-0">
+                                        <input type="checkbox" class="btn-check interest-checkbox" id="interest_{{ interest.id }}" name="interest_ids" value="{{ interest.id }}" {% if interest.id in selected_interest_ids %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary text-start w-100 py-3 px-3 rounded-3 interest-checkbox-label d-flex align-items-center justify-content-between" for="interest_{{ interest.id }}">
+                                            <span><i class="bi bi-tag-fill me-2 opacity-50"></i>{{ interest.interest_name }}</span>
+                                            <i class="bi bi-check-circle-fill fs-5"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="document.querySelectorAll('.interest-checkbox').forEach(cb => cb.checked = false); updateInterestCounter();">
+                                <i class="bi bi-trash me-1"></i>Deselect All
+                            </button>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                                    <i class="bi bi-check2-circle me-1"></i>Save Selected Interests
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

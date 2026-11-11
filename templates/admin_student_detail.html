@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile: {{ student.full_name }} — Admin Portal{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-dark text-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-2">Student Dossier</span>
+                <h2 class="fw-bold mb-1"><i class="bi bi-person-bounding-box me-2"></i>{{ student.full_name }}</h2>
+                <p class="mb-0 text-white-50">Roll ID: {{ student.roll_number }} &bull; Registered: {{ student.created_at }}</p>
+            </div>
+            <a href="{{ url_for('admin.students') }}" class="btn btn-outline-light fw-semibold mt-3 mt-md-0">
+                <i class="bi bi-arrow-left me-1"></i>Back to Student List
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'students' %}
+            {% include 'components/admin_sidebar.html' %}
+        </div>
+
+        <!-- Details Column -->
+        <div class="col-lg-9">
+            <!-- Profile Overview Card -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-mortarboard text-primary me-2"></i>Academic & Account Profile</h5>
+                    {% if student.is_active %}
+                        <span class="badge bg-success px-3 py-2 rounded-pill">Active Account</span>
+                    {% else %}
+                        <span class="badge bg-danger px-3 py-2 rounded-pill">Deactivated</span>
+                    {% endif %}
+                </div>
+                <div class="card-body px-4">
+                    <div class="row g-3 small mb-3">
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted d-block">Department</span>
+                            <span class="fw-bold fs-6 text-dark">{{ student.department }}</span>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted d-block">Semester Standing</span>
+                            <span class="fw-bold fs-6 text-dark">Semester {{ student.semester }}</span>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted d-block">Cumulative CGPA</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle fs-6">{{ "%.2f"|format(student.cgpa) }}</span>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted d-block">Roll Number</span>
+                            <span class="fw-bold fs-6 text-dark">{{ student.roll_number }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Account Username</span>
+                            <span class="fw-semibold text-dark">{{ student.username }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Registered Email Address</span>
+                            <span class="fw-semibold text-dark">{{ student.email }}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3">
+                        <span class="text-muted small d-block">Preferred Career Pathway</span>
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-compass text-primary me-1"></i>{{ student.career_goal_name or 'None Selected' }}
+                        </h6>
+                        {% if student.career_goal_description %}
+                            <p class="small text-secondary mb-0 mt-1">{{ student.career_goal_description }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-2">
+                        <span class="text-muted small d-block mb-1">Selected Domain Interests:</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if interests %}
+                                {% for int in interests %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 rounded-pill">
+                                        <i class="bi bi-tag-fill me-1 opacity-50"></i>{{ int.interest_name }}
+                                    </span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted small fst-italic">No interests chosen yet.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation History Card -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-lightning-charge text-warning me-2"></i>Recommendation History for Student</h5>
+                    <span class="badge bg-light text-secondary border">{{ recommendations|length }} recommendations</span>
+                </div>
+                <div class="card-body px-4">
+                    {% if recommendations %}
+                        <div class="list-group list-group-flush">
+                            {% for rec in recommendations %}
+                                <div class="list-group-item px-0 py-3 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <div>
+                                            <h6 class="fw-bold text-primary mb-1">{{ rec.course_code }}: {{ rec.course_name }}</h6>
+                                            <span class="badge bg-secondary-subtle text-secondary me-2">{{ rec.difficulty_level }}</span>
+                                            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ rec.created_at }}</small>
+                                        </div>
+                                        <span class="badge bg-success fs-6 px-3 py-1 rounded-pill">
+                                            Score: {{ "%.1f"|format(rec.recommendation_score) }}%
+                                        </span>
+                                    </div>
+                                    <p class="small text-secondary mb-0 bg-light p-2 rounded-2 mt-2">
+                                        <i class="bi bi-info-circle text-primary me-1"></i><strong>Rule Reasoning:</strong> {{ rec.reasoning }}
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted small">
+                            <i class="bi bi-clock-history fs-3 d-block mb-1 text-muted"></i>
+                            No recommendation records logged for this student profile.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

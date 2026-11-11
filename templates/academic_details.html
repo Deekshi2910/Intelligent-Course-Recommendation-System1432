@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Details — Course Recommendation System{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Top Welcome Banner -->
+    <div class="card shadow-sm border-0 rounded-4 bg-primary text-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Academic Standing</span>
+                <h2 class="fw-bold mb-1"><i class="bi bi-mortarboard-fill me-2"></i>Academic Details</h2>
+                <p class="mb-0 text-white-50">Keep your semester and CGPA updated for accurate AI rule evaluation.</p>
+            </div>
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-light text-primary fw-semibold mt-3 mt-md-0">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            {% set active_page = 'academic' %}
+            {% include 'components/student_sidebar.html' %}
+        </div>
+
+        <!-- Academic Details Form -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold text-dark mb-1"><i class="bi bi-pencil-square text-primary me-2"></i>Update Academic Standing</h5>
+                    <p class="text-muted small">Your CGPA and semester are used by the Inference Engine to match course prerequisites and difficulty levels.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info border-0 rounded-3 mb-4 small d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill fs-5 me-3 text-info"></i>
+                        <div>
+                            <strong>Evaluation Scale:</strong> CGPA is measured on a standard scale from <strong>0.00 to 10.00</strong>. Advanced courses (e.g. <em>Deep Learning</em>, <em>NLP</em>) activate with higher CGPA and upper semester thresholds.
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('student.academic') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="semester" class="form-label fw-semibold small">Current Semester (1 – 12)</label>
+                                <select class="form-select" id="semester" name="semester" required>
+                                    {% for sem in range(1, 13) %}
+                                        <option value="{{ sem }}" {% if profile.semester == sem %}selected{% endif %}>Semester {{ sem }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cgpa" class="form-label fw-semibold small">Current CGPA (0.00 – 10.00)</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0.00" max="10.00" class="form-control" id="cgpa" name="cgpa" value="{{ '%.2f'|format(profile.cgpa) }}" required>
+                                    <span class="input-group-text bg-light text-muted">/ 10.00</span>
+                                </div>
+                                <div class="form-text small">Accepts values from 0.00 to 10.00.</div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information Readout -->
+                        <div class="p-3 bg-light rounded-3 mb-4">
+                            <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-info-circle me-1"></i>Current Academic Record:</h6>
+                            <div class="row g-2 small text-secondary">
+                                <div class="col-sm-4">
+                                    <strong>Department:</strong> {{ profile.department }}
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Standing:</strong> Semester {{ profile.semester }}
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Recorded CGPA:</strong> {{ "%.2f"|format(profile.cgpa) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i>Save Academic Details
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

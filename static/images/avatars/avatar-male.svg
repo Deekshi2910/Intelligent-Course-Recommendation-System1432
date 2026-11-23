@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <!-- Background Circle -->
+  <defs>
+    <linearGradient id="bgGradMale" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EAF5FF"/>
+      <stop offset="100%" stop-color="#CBE5FF"/>
+    </linearGradient>
+    <linearGradient id="shirtGradMale" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#087FE5"/>
+      <stop offset="100%" stop-color="#0756B5"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="64" fill="url(#bgGradMale)"/>
+  
+  <!-- Male Shoulders / Collegiate Jacket -->
+  <path d="M22 128 C24 98, 42 86, 64 86 C86 86, 104 98, 106 128 Z" fill="url(#shirtGradMale)"/>
+  <!-- Inner White Collar / Shirt -->
+  <polygon points="64,88 52,98 64,116 76,98" fill="#FFFFFF"/>
+  <polygon points="64,98 60,116 68,116" fill="#00A0D6"/>
+
+  <!-- Neck -->
+  <rect x="54" y="66" width="20" height="24" rx="4" fill="#F8C8A0"/>
+  <!-- Neck shadow -->
+  <path d="M54 74 C58 80, 70 80, 74 74 L74 78 C70 84, 58 84, 54 78 Z" fill="#E6B086"/>
+
+  <!-- Head Base -->
+  <ellipse cx="64" cy="54" rx="22" ry="26" fill="#FDD6B5"/>
+  <!-- Ears -->
+  <ellipse cx="42" cy="54" rx="4.5" ry="7" fill="#F8C8A0"/>
+  <ellipse cx="86" cy="54" rx="4.5" ry="7" fill="#F8C8A0"/>
+
+  <!-- Male Hair Style (Modern short side-part) -->
+  <path d="M40 46 C40 26, 52 20, 68 20 C82 20, 88 28, 88 44 C88 46, 84 42, 80 40 C72 37, 56 36, 44 48 Z" fill="#2D3748"/>
+  <path d="M41 46 C43 36, 50 24, 68 22 C78 22, 85 27, 88 40 C84 34, 76 30, 66 30 C54 30, 46 36, 41 46 Z" fill="#1A202C"/>
+
+  <!-- Eyebrows -->
+  <path d="M48 44 Q54 41 58 44" stroke="#2D3748" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M70 44 Q74 41 80 44" stroke="#2D3748" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Eyes -->
+  <circle cx="53" cy="51" r="2.8" fill="#1A202C"/>
+  <circle cx="75" cy="51" r="2.8" fill="#1A202C"/>
+  <circle cx="54" cy="50" r="0.9" fill="#FFFFFF"/>
+  <circle cx="76" cy="50" r="0.9" fill="#FFFFFF"/>
+
+  <!-- Modern Glasses (Smart Student Touch) -->
+  <rect x="46" y="46" width="14" height="11" rx="3" fill="none" stroke="#087FE5" stroke-width="1.6"/>
+  <rect x="68" y="46" width="14" height="11" rx="3" fill="none" stroke="#087FE5" stroke-width="1.6"/>
+  <line x1="60" y1="51" x2="68" y2="51" stroke="#087FE5" stroke-width="1.6"/>
+
+  <!-- Nose -->
+  <path d="M63 54 Q64 60 66 60" stroke="#E6B086" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+  <!-- Confident Smile -->
+  <path d="M56 66 Q64 72 72 66" stroke="#C87259" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+</svg>

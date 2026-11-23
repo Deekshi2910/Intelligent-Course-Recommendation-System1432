@@ -3,8 +3,10 @@ venv/
 env/
 ENV/
 
-# Environment Variables
+# Environment Variables & Secrets
 .env
+.env.local
+.env.*.local
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -38,8 +40,27 @@ wheels/
 # Operating System Files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Pytest cache
+# Pytest and Test Coverage
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Logs and Instance
+*.log
+instance/
+
+# User Uploaded Photographs (Keep directory structure via .gitkeep)
+static/uploads/profiles/*
+!static/uploads/profiles/.gitkeep
+
+# Intermediate report generation scripts and docx reference files
+*.docx
+extracted_doc_text.txt
+extracted_media/
+report_diagrams/
+inspect_*.py
+generate_diagrams.py
+preliminary_pages_builder.py
+build_full_report.py

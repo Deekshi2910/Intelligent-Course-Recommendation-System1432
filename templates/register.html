@@ -1,91 +1,227 @@
 {% extends "base.html" %}
 
-{% block title %}Register Student Profile — Course Recommendation System{% endblock %}
+{% block title %}Student Registration — CourseRecommender AI{% endblock %}
+
+{% block main_class %}p-0{% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle mb-3" style="width: 56px; height: 56px;">
-                            <i class="bi bi-person-plus-fill fs-4"></i>
-                        </div>
-                        <h3 class="fw-bold text-dark">Register Student Profile</h3>
-                        <p class="text-muted small">Enter your academic details to enable intelligent AI elective recommendations</p>
-                    </div>
+<div class="registration-page-wrapper">
+    <div class="container py-5 d-flex justify-content-center">
+        <div class="registration-card p-4 p-md-5">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-3 shadow-sm" style="width: 58px; height: 58px;">
+                    <i class="bi bi-mortarboard-fill fs-3"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-1">Create Student Profile</h2>
+                <p class="text-muted small mb-0">Join CourseRecommender AI to discover elective courses aligned with your goals</p>
+            </div>
 
-                    <form method="POST" action="{{ url_for('auth.register') }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2"><i class="bi bi-mortarboard me-2"></i>Academic Details</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="full_name" class="form-label fw-semibold small">Full Name</label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="e.g. Jane Doe" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="roll_number" class="form-label fw-semibold small">Roll / Student ID</label>
-                                <input type="text" class="form-control" id="roll_number" name="roll_number" placeholder="e.g. CS-2023-042" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="department" class="form-label fw-semibold small">Department</label>
-                                <select class="form-select" id="department" name="department" required>
-                                    <option value="" disabled selected>Select Department</option>
-                                    <option value="Computer Science">Computer Science</option>
-                                    <option value="Software Engineering">Software Engineering</option>
-                                    <option value="Data Science">Data Science</option>
-                                    <option value="Information Technology">Information Technology</option>
-                                    <option value="Artificial Intelligence">Artificial Intelligence</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="semester" class="form-label fw-semibold small">Current Semester</label>
-                                <select class="form-select" id="semester" name="semester" required>
-                                    <option value="" disabled selected>Select Semester</option>
-                                    {% for sem in range(1, 9) %}
-                                        <option value="{{ sem }}">Semester {{ sem }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="cgpa" class="form-label fw-semibold small">Current CGPA (0.00 - 4.00)</label>
-                                <input type="number" step="0.01" min="0.00" max="4.00" class="form-control" id="cgpa" name="cgpa" placeholder="e.g. 3.45" required>
-                            </div>
+            <!-- Registration Form -->
+            <form method="POST" action="{{ url_for('auth.register') }}" enctype="multipart/form-data" id="registrationForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- ========================================================
+                     1. Profile Photo & Avatar Preview Section
+                     ======================================================== -->
+                <div class="card border border-primary-subtle bg-primary-subtle bg-opacity-10 rounded-4 p-3 mb-4">
+                    <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                        <!-- Dynamic Avatar Preview -->
+                        <div class="position-relative flex-shrink-0">
+                            <img id="avatarPreview" 
+                                 src="{{ url_for('static', filename='images/avatars/avatar-neutral.svg') }}" 
+                                 alt="Avatar Preview" 
+                                 class="rounded-circle border border-2 border-primary shadow-sm object-fit-cover bg-white" 
+                                 style="width: 80px; height: 80px;">
+                            <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-primary border border-white" style="font-size: 0.65rem;" id="avatarTypeBadge">
+                                Default
+                            </span>
                         </div>
 
-                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2"><i class="bi bi-shield-lock me-2"></i>Account Credentials</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="username" class="form-label fw-semibold small">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
+                        <!-- Upload Controls -->
+                        <div class="flex-grow-1 text-center text-sm-start">
+                            <label for="profile_photo" class="form-label fw-bold small text-dark mb-1">
+                                <i class="bi bi-camera me-1 text-primary"></i>Profile Photograph <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            <input class="form-control form-control-sm" type="file" id="profile_photo" name="profile_photo" accept=".jpg,.jpeg,.png,.webp">
+                            <div class="form-text small" style="font-size: 0.75rem;">
+                                Supported: JPG, JPEG, PNG, WEBP (Max 2MB). A default avatar is assigned based on selected gender if omitted.
                             </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label fw-semibold small">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="student@university.edu" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="password" class="form-label fw-semibold small">Password (Min 6 characters)</label>
-                                <input type="password" class="form-control" id="password" name="password" minlength="6" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="confirm_password" class="form-label fw-semibold small">Confirm Password</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="6" required>
-                            </div>
+                            <button type="button" class="btn btn-link btn-sm text-danger p-0 mt-1 d-none text-decoration-none" id="clearPhotoBtn" style="font-size: 0.75rem;">
+                                <i class="bi bi-x-circle me-1"></i>Remove selected photo
+                            </button>
                         </div>
-
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
-                            Complete Registration
-                        </button>
-                    </form>
-
-                    <div class="text-center text-muted small mt-3 pt-3 border-top">
-                        Already have an account? 
-                        <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold text-decoration-none">Log in here</a>
                     </div>
                 </div>
+
+                <!-- ========================================================
+                     2. Academic Information
+                     ======================================================== -->
+                <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-mortarboard me-2"></i>Academic Details
+                </h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="full_name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" placeholder="e.g. Jane Doe" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="roll_number" class="form-label fw-semibold small">Roll / Student ID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="roll_number" name="roll_number" placeholder="e.g. CS-2024-042" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="gender" class="form-label fw-semibold small">Gender <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="Prefer not to say" selected>Prefer not to say</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="department" class="form-label fw-semibold small">Department <span class="text-danger">*</span></label>
+                        <select class="form-select" id="department" name="department" required>
+                            <option value="" disabled selected>Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="semester" class="form-label fw-semibold small">Current Semester <span class="text-danger">*</span></label>
+                        <select class="form-select" id="semester" name="semester" required>
+                            <option value="" disabled selected>Select Semester</option>
+                            {% for sem in range(1, 9) %}
+                                <option value="{{ sem }}">Semester {{ sem }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="cgpa" class="form-label fw-semibold small">Current CGPA (0.00 – 4.00) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" min="0.00" max="4.00" class="form-control" id="cgpa" name="cgpa" placeholder="e.g. 3.75" required>
+                    </div>
+                </div>
+
+                <!-- ========================================================
+                     3. Account Credentials
+                     ======================================================== -->
+                <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-shield-lock me-2"></i>Account Credentials
+                </h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="username" class="form-label fw-semibold small">Username <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required autocomplete="username">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="student@university.edu" required autocomplete="email">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password" class="form-label fw-semibold small">Password (Min 6 characters) <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password" name="password" minlength="6" required autocomplete="new-password">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="confirm_password" class="form-label fw-semibold small">Confirm Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="6" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3" id="submitRegBtn">
+                    <i class="bi bi-person-check-fill me-2"></i>Complete Registration
+                </button>
+            </form>
+
+            <!-- Bottom Navigation -->
+            <div class="text-center text-muted small mt-3 pt-3 border-top">
+                Already registered? 
+                <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold text-decoration-none">Sign in here</a>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const genderSelect = document.getElementById('gender');
+    const photoInput = document.getElementById('profile_photo');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarTypeBadge = document.getElementById('avatarTypeBadge');
+    const clearPhotoBtn = document.getElementById('clearPhotoBtn');
+    const regForm = document.getElementById('registrationForm');
+    const submitRegBtn = document.getElementById('submitRegBtn');
+
+    // Default Avatar URLs
+    const maleAvatarUrl = "{{ url_for('static', filename='images/avatars/avatar-male.svg') }}";
+    const femaleAvatarUrl = "{{ url_for('static', filename='images/avatars/avatar-female.svg') }}";
+    const neutralAvatarUrl = "{{ url_for('static', filename='images/avatars/avatar-neutral.svg') }}";
+
+    function updateDefaultAvatar() {
+        if (photoInput.files && photoInput.files[0]) {
+            return; // Custom photo takes precedence
+        }
+        const gender = genderSelect.value;
+        if (gender === 'Male') {
+            avatarPreview.src = maleAvatarUrl;
+            avatarTypeBadge.textContent = 'Male Default';
+            avatarTypeBadge.className = 'position-absolute bottom-0 end-0 badge rounded-pill bg-primary border border-white';
+        } else if (gender === 'Female') {
+            avatarPreview.src = femaleAvatarUrl;
+            avatarTypeBadge.textContent = 'Female Default';
+            avatarTypeBadge.className = 'position-absolute bottom-0 end-0 badge rounded-pill bg-info border border-white text-white';
+        } else {
+            avatarPreview.src = neutralAvatarUrl;
+            avatarTypeBadge.textContent = 'Neutral';
+            avatarTypeBadge.className = 'position-absolute bottom-0 end-0 badge rounded-pill bg-secondary border border-white';
+        }
+    }
+
+    // Gender change handler
+    genderSelect.addEventListener('change', updateDefaultAvatar);
+
+    // Photo input change handler with instant client preview
+    photoInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            // Check size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert("The selected photo exceeds the 2 MB limit. Please select a smaller photo.");
+                this.value = '';
+                updateDefaultAvatar();
+                clearPhotoBtn.classList.add('d-none');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                avatarPreview.src = e.target.result;
+                avatarTypeBadge.textContent = 'Custom Photo';
+                avatarTypeBadge.className = 'position-absolute bottom-0 end-0 badge rounded-pill bg-success border border-white';
+                clearPhotoBtn.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            updateDefaultAvatar();
+            clearPhotoBtn.classList.add('d-none');
+        }
+    });
+
+    // Clear photo selection button
+    clearPhotoBtn.addEventListener('click', function () {
+        photoInput.value = '';
+        clearPhotoBtn.classList.add('d-none');
+        updateDefaultAvatar();
+    });
+
+    // Form submit loading state
+    regForm.addEventListener('submit', function () {
+        submitRegBtn.disabled = true;
+        submitRegBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Creating profile...';
+    });
+});
+</script>
 {% endblock %}

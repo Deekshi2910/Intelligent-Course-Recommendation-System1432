@@ -54,6 +54,8 @@ CREATE TABLE `student_profiles` (
     `department` VARCHAR(100) NOT NULL,
     `semester` INT NOT NULL,
     `cgpa` DECIMAL(4, 2) NOT NULL DEFAULT 0.00,
+    `gender` VARCHAR(20) DEFAULT 'Prefer not to say',
+    `profile_photo` VARCHAR(255) NULL DEFAULT NULL,
     `career_goal_id` INT NULL,
     CONSTRAINT `fk_student_user` FOREIGN KEY (`user_id`)
         REFERENCES `users` (`id`)

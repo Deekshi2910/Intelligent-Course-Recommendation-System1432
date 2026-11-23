@@ -5,15 +5,17 @@
 
 /* Dashboard Layout */
 .dashboard-sidebar {
-    background: #ffffff;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 1rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
     padding: 1.25rem;
     margin-bottom: 1.5rem;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .dashboard-nav .nav-link {
-    color: #495057;
+    color: var(--text-secondary);
     font-weight: 500;
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
@@ -26,23 +28,23 @@
 .dashboard-nav .nav-link i {
     font-size: 1.1rem;
     margin-right: 0.75rem;
-    color: #6c757d;
+    color: var(--text-secondary);
     transition: color 0.2s ease;
 }
 
 .dashboard-nav .nav-link:hover {
-    background-color: #f0f4f9;
-    color: #0d6efd;
+    background-color: var(--bg-secondary);
+    color: var(--primary-color);
 }
 
 .dashboard-nav .nav-link:hover i {
-    color: #0d6efd;
+    color: var(--primary-color);
 }
 
 .dashboard-nav .nav-link.active {
-    background-color: #0d6efd;
+    background-color: var(--primary-color);
     color: #ffffff;
-    box-shadow: 0 0.25rem 0.5rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0.25rem 0.5rem rgba(8, 127, 229, 0.25);
 }
 
 .dashboard-nav .nav-link.active i {
@@ -51,15 +53,16 @@
 
 /* Metric / Counter Cards */
 .stat-card {
+    background-color: var(--bg-card);
     border-radius: 1rem;
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
 }
 
 /* Interest Selectable Tags */
@@ -70,22 +73,23 @@
 }
 
 .interest-checkbox:checked + .interest-checkbox-label {
-    background-color: #0d6efd !important;
+    background-color: var(--primary-color) !important;
     color: #ffffff !important;
-    border-color: #0d6efd !important;
+    border-color: var(--primary-color) !important;
 }
 
 /* Course Cards */
 .course-card {
-    border: none;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 1rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease;
 }
 
 .course-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 /* Recommendation Score Indicator */

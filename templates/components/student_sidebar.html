@@ -1,11 +1,21 @@
 <!-- Reusable Student Dashboard Sidebar Navigation -->
 <div class="dashboard-sidebar shadow-sm border-0 rounded-4 p-3 bg-white mb-4">
     <div class="text-center pb-3 border-bottom mb-3">
-        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 60px; height: 60px;">
-            <i class="bi bi-person-fill fs-3"></i>
+        <div class="position-relative d-inline-block mb-2">
+            <img src="{{ student_avatar_url(profile if profile else session.get('gender'), session.get('profile_photo')) }}" 
+                 alt="{{ profile.full_name if profile else session.get('username') }}" 
+                 class="rounded-circle shadow-sm border object-fit-cover" 
+                 style="width: 72px; height: 72px; background-color: var(--bg-card);">
         </div>
         <h6 class="fw-bold mb-0 text-dark">{{ profile.full_name if profile else session.get('username') }}</h6>
         <span class="badge bg-light text-secondary border mt-1">{{ profile.roll_number if profile else 'Student' }}</span>
+        {% if profile and profile.gender and profile.gender != 'Prefer not to say' %}
+            <div class="mt-1">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small" style="font-size: 0.72rem;">
+                    {{ profile.gender }}
+                </span>
+            </div>
+        {% endif %}
     </div>
     
     <nav class="nav flex-column dashboard-nav">

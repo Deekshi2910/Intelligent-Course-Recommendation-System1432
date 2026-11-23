@@ -7,10 +7,16 @@
     <!-- Top Welcome Banner -->
     <div class="card shadow-sm border-0 rounded-4 bg-primary text-white p-4 mb-4">
         <div class="row align-items-center">
-            <div class="col-md-8">
-                <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Student Portal</span>
-                <h2 class="fw-bold mb-1">Welcome back, {{ profile.full_name if profile else session.get('username') }}!</h2>
-                <p class="mb-0 text-white-50">Review your academic standing, manage domain interests, and access intelligent course recommendations.</p>
+            <div class="col-md-8 d-flex align-items-center gap-3">
+                <img src="{{ student_avatar_url(profile if profile else session.get('gender'), session.get('profile_photo')) }}" 
+                     alt="Student Avatar" 
+                     class="rounded-circle border border-2 border-white shadow-sm object-fit-cover flex-shrink-0" 
+                     style="width: 68px; height: 68px; background-color: rgba(255, 255, 255, 0.2);">
+                <div>
+                    <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-1">Student Portal</span>
+                    <h2 class="fw-bold mb-1">Welcome back, {{ profile.full_name if profile else session.get('username') }}!</h2>
+                    <p class="mb-0 text-white-50">Review your academic standing, manage domain interests, and access intelligent course recommendations.</p>
+                </div>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
                 <a href="{{ url_for('student.recommendations') }}" class="btn btn-light text-primary fw-semibold shadow-sm">

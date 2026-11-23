@@ -9,6 +9,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db_connection import get_db_cursor
 from routes.decorators import no_cache
+from routes.upload_helper import validate_and_save_profile_photo, delete_profile_photo
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -41,11 +42,13 @@ def login():
 
         try:
             with get_db_cursor(dictionary=True) as (cursor, _):
-                # Search by username or email
+                # Search by username or email with profile details
                 cursor.execute("""
-                    SELECT id, username, email, password_hash, role, is_active
-                    FROM users
-                    WHERE LOWER(email) = LOWER(%s) OR LOWER(username) = LOWER(%s)
+                    SELECT u.id, u.username, u.email, u.password_hash, u.role, u.is_active,
+                           sp.gender, sp.profile_photo
+                    FROM users u
+                    LEFT JOIN student_profiles sp ON u.id = sp.user_id
+                    WHERE LOWER(u.email) = LOWER(%s) OR LOWER(u.username) = LOWER(%s)
                 """, (identifier, identifier))
                 user = cursor.fetchone()
 
@@ -70,6 +73,8 @@ def login():
                 session["username"] = user["username"]
                 session["email"] = user["email"]
                 session["role"] = user["role"]
+                session["gender"] = user.get("gender") or "Prefer not to say"
+                session["profile_photo"] = user.get("profile_photo")
 
                 flash(f"Welcome back, {user['username']}!", "success")
                 next_page = request.args.get("next")
@@ -104,6 +109,11 @@ def register():
         cgpa = request.form.get("cgpa", type=float)
         if cgpa is None:
             cgpa = 0.00
+
+        # Gender Selection
+        gender = request.form.get("gender", "Prefer not to say").strip()
+        if gender not in {"Male", "Female", "Prefer not to say"}:
+            gender = "Prefer not to say"
 
         # Input Validation
         if not full_name or len(full_name) < 2:
@@ -165,11 +175,21 @@ def register():
                 if cursor.fetchone():
                     roll_number = f"STU-{user_id:04d}-{username[:4].upper()}"
 
+                # Optional Photo Upload during Registration
+                profile_photo_path = None
+                photo_file = request.files.get("profile_photo")
+                if photo_file and photo_file.filename:
+                    saved_path, err = validate_and_save_profile_photo(photo_file, user_id)
+                    if err:
+                        flash(f"Profile photo notice: {err}", "warning")
+                    else:
+                        profile_photo_path = saved_path
+
                 # 4. Insert into student_profiles table
                 cursor.execute("""
-                    INSERT INTO student_profiles (user_id, full_name, roll_number, department, semester, cgpa)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, (user_id, full_name, roll_number, department, semester, cgpa))
+                    INSERT INTO student_profiles (user_id, full_name, roll_number, department, semester, cgpa, gender, profile_photo)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (user_id, full_name, roll_number, department, semester, cgpa, gender, profile_photo_path))
 
             flash("Registration successful! You can now sign in with your credentials.", "success")
             return redirect(url_for("auth.login"))

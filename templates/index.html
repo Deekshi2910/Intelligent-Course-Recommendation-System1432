@@ -1,69 +1,396 @@
 {% extends "base.html" %}
 
-{% block title %}Home — Intelligent Course Recommendation System{% endblock %}
+{% block title %}CourseRecommender AI — Intelligent Course Recommendation System{% endblock %}
+
+{% block main_class %}p-0{% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <!-- Hero Section -->
-    <div class="row justify-content-center text-center">
-        <div class="col-lg-9">
-            <div class="card shadow-sm border-0 rounded-4 p-5 bg-white">
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill align-self-center mb-3">
-                    Artificial Intelligence Lab Project
-                </span>
-                <h1 class="display-5 fw-bold text-dark mb-3">Intelligent Course Recommendation System</h1>
-                <p class="lead text-secondary mb-4">
-                    An intelligent academic advisory engine integrating Knowledge-Based Systems, Rule-Based Reasoning, Default Reasoning, and an Inference Engine to guide student elective choices.
+<!-- ==========================================================================
+     1. Hero Section (Split-Screen Modern SaaS Layout)
+     ========================================================================== -->
+<section class="hero-saas">
+    <div class="container position-relative">
+        <div class="row align-items-center g-5">
+            <!-- Left Column: Content & Actions -->
+            <div class="col-lg-6">
+                <!-- Top Rounded Pill Badge -->
+                <div class="mb-3">
+                    <span class="hero-badge">
+                        <i class="bi bi-shield-check me-2"></i>AI-Powered Academic Guidance
+                    </span>
+                </div>
+
+                <!-- Main Hero Heading -->
+                <h1 class="hero-heading mb-3">
+                    Make Smarter<br>
+                    <span class="text-gradient">Elective Choices</span><br>
+                    with Intelligent AI
+                </h1>
+
+                <!-- Supporting Description -->
+                <p class="hero-subtitle mb-4">
+                    Discover the right elective courses based on your interests, academic performance, and career goals. Our intelligent recommendation engine helps you make informed academic decisions.
                 </p>
 
-                <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+                <!-- Action CTA Buttons -->
+                <div class="d-flex flex-wrap gap-3 mb-4 pb-2">
                     {% if session.get('user_id') %}
                         {% if session.get('role') == 'admin' %}
-                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-lg px-4 shadow-sm">
-                                <i class="bi bi-speedometer2 me-2"></i>Go to Admin Dashboard
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn-hero-primary">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>Go to Admin Dashboard</span>
+                            </a>
+                            <a href="{{ url_for('admin.courses') }}" class="btn-hero-secondary">
+                                <i class="bi bi-book"></i>
+                                <span>Manage Courses</span>
                             </a>
                         {% else %}
-                            <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-lg px-4 shadow-sm">
-                                <i class="bi bi-person-lines-fill me-2"></i>Open Student Dashboard
+                            <a href="{{ url_for('student.recommendations') }}" class="btn-hero-primary">
+                                <i class="bi bi-stars"></i>
+                                <span>Explore Recommendations</span>
+                            </a>
+                            <a href="{{ url_for('student.courses') }}" class="btn-hero-secondary">
+                                <i class="bi bi-compass"></i>
+                                <span>Explore Courses</span>
                             </a>
                         {% endif %}
                     {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 shadow-sm">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Student Login
+                        <a href="{{ url_for('auth.login', next=url_for('student.recommendations')) }}" class="btn-hero-primary">
+                            <i class="bi bi-stars"></i>
+                            <span>Explore Recommendations</span>
                         </a>
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg px-4">
-                            <i class="bi bi-person-plus me-2"></i>Register Profile
-                        </a>
-                        <a href="{{ url_for('admin.login') }}" class="btn btn-outline-dark btn-lg px-4">
-                            <i class="bi bi-shield-lock me-2"></i>Admin Portal
+                        <a href="{{ url_for('auth.login', next=url_for('student.courses')) }}" class="btn-hero-secondary">
+                            <i class="bi bi-compass"></i>
+                            <span>Explore Courses</span>
                         </a>
                     {% endif %}
                 </div>
 
-                <div class="border-top pt-4 mt-2">
-                    <div class="row g-3 text-start">
-                        <div class="col-md-4">
-                            <div class="p-3 bg-light rounded-3 h-100">
-                                <h6 class="fw-bold text-primary mb-1"><i class="bi bi-cpu me-2"></i>AI Inference Engine</h6>
-                                <p class="small text-muted mb-0">Rule-based reasoning dynamically matches interests, prerequisite eligibility, and academic history.</p>
+                <!-- 3 Short Benefit Indicators with Icons -->
+                <div class="d-flex flex-wrap gap-4 pt-2">
+                    <div class="benefit-item">
+                        <i class="bi bi-check-circle-fill benefit-icon"></i>
+                        <span>Personalized Course Suggestions</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="bi bi-check-circle-fill benefit-icon"></i>
+                        <span>AI-Based Reasoning</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="bi bi-check-circle-fill benefit-icon"></i>
+                        <span>Career-Oriented Learning</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Visual Design & Floating Cards -->
+            <div class="col-lg-6">
+                <div class="hero-visual-wrapper">
+                    <!-- Top-Left Floating Avatar Badge (inspired by reference icon circle) -->
+                    <div class="floating-avatar-badge" title="AI Advisory System">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+
+                    <!-- Floating Card 1: Top Right (Smart Recommendations) -->
+                    <div class="floating-card card-float-topright">
+                        <div class="floating-icon-box icon-box-primary">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark small mb-0">Smart Recommendations</div>
+                            <div class="text-muted" style="font-size: 0.75rem; line-height: 1.3;">Courses matched to student interests.</div>
+                        </div>
+                    </div>
+
+                    <!-- Main Dashboard Educational AI Visual -->
+                    <div class="hero-main-card">
+                        <!-- Window Chrome Bar -->
+                        <div class="card-window-bar">
+                            <div class="window-dots">
+                                <span class="window-dot dot-red"></span>
+                                <span class="window-dot dot-yellow"></span>
+                                <span class="window-dot dot-green"></span>
+                            </div>
+                            <div class="small fw-semibold text-muted d-flex align-items-center gap-1">
+                                <i class="bi bi-cpu text-primary"></i> CourseRecommender AI Engine
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.65rem;">
+                                Active Reasoning
+                            </span>
+                        </div>
+
+                        <!-- Card Body: Academic Profile & Match Display -->
+                        <div class="p-4">
+                            <!-- Student Profile Strip -->
+                            <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 0.85rem;">
+                                        SC
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark small">Student Profile: Engineering</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">Computer Science &bull; Semester 5</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-white text-primary border shadow-sm px-2 py-1 small fw-semibold">
+                                    Verified CGPA
+                                </span>
+                            </div>
+
+                            <!-- Career Goal Tag -->
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span class="text-muted small fw-medium" style="font-size: 0.75rem;">Career Target:</span>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small">
+                                    <i class="bi bi-crosshair me-1"></i>Data Scientist / AI Engineer
+                                </span>
+                            </div>
+
+                            <!-- Matched Course Recommendation Preview Card -->
+                            <div class="border rounded-3 p-3 bg-white shadow-sm mb-2">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="badge bg-light text-secondary border me-1 small">CS-401</span>
+                                        <h6 class="fw-bold text-dark mb-0 d-inline-block">Machine Learning</h6>
+                                    </div>
+                                    <span class="badge bg-success text-white px-2 py-1 rounded-pill small">
+                                        <i class="bi bi-check2-circle me-1"></i>Highly Recommended
+                                    </span>
+                                </div>
+
+                                <!-- Interest Match Badges -->
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <span class="badge bg-light text-primary border" style="font-size: 0.7rem;">Artificial Intelligence</span>
+                                    <span class="badge bg-light text-primary border" style="font-size: 0.7rem;">Predictive Analytics</span>
+                                    <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">3 Credits</span>
+                                </div>
+
+                                <!-- Prerequisite Status -->
+                                <div class="d-flex align-items-center gap-1 text-success small mb-2" style="font-size: 0.75rem;">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span>Prerequisites Verified: CS-201 Data Structures</span>
+                                </div>
+
+                                <!-- AI Rationale Quote -->
+                                <div class="p-2 rounded-2 bg-light border-start border-3 border-primary small text-secondary" style="font-size: 0.75rem; line-height: 1.4;">
+                                    <strong>AI Rationale:</strong> Matched via Production Rule PR-03 with full interest alignment and verified prerequisite clearance.
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="p-3 bg-light rounded-3 h-100">
-                                <h6 class="fw-bold text-success mb-1"><i class="bi bi-database me-2"></i>Relational Knowledge</h6>
-                                <p class="small text-muted mb-0">Normalized MySQL schema managing courses, career goals, prerequisites, and student profiles.</p>
-                            </div>
+                    </div>
+
+                    <!-- Floating Card 2: Bottom Left (AI Reasoning Engine) -->
+                    <div class="floating-card card-float-bottomleft">
+                        <div class="floating-icon-box icon-box-cyan">
+                            <i class="bi bi-cpu-fill"></i>
                         </div>
-                        <div class="col-md-4">
-                            <div class="p-3 bg-light rounded-3 h-100">
-                                <h6 class="fw-bold text-warning mb-1"><i class="bi bi-shield-check me-2"></i>Audit History</h6>
-                                <p class="small text-muted mb-0">Full recommendation traceability with scoring metrics and natural language reasoning logs.</p>
-                            </div>
+                        <div>
+                            <div class="fw-bold text-dark small mb-0">AI Reasoning Engine</div>
+                            <div class="text-muted" style="font-size: 0.75rem; line-height: 1.3;">Knowledge-based intelligent decisions.</div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Card 3: Bottom Right (Career Alignment) -->
+                    <div class="floating-card card-float-bottomright d-none d-sm-flex">
+                        <div class="floating-icon-box icon-box-green">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark small mb-0">Career Alignment</div>
+                            <div class="text-muted" style="font-size: 0.75rem; line-height: 1.3;">Recommendations based on career goals.</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- ==========================================================================
+     2. Feature Highlights Section
+     ========================================================================== -->
+<section id="features" class="features-section">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="text-center mb-5">
+            <span class="section-badge">
+                <i class="bi bi-stars me-1"></i>Core AI Principles
+            </span>
+            <h2 class="section-title mb-2">Intelligence Behind Every Recommendation</h2>
+            <p class="section-subtitle">
+                Combining AI reasoning techniques to deliver meaningful academic guidance.
+            </p>
+        </div>
+
+        <!-- 4 Feature Cards Grid -->
+        <div class="row g-4">
+            <!-- Card 1: Knowledge Base -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper" style="background-color: rgba(8, 127, 229, 0.1); color: #087FE5;">
+                        <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+                    <h5 class="feature-title">Knowledge Base</h5>
+                    <p class="feature-desc">
+                        Organizes course information, student interests, career goals, and academic eligibility.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card 2: Rule-Based Reasoning -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper" style="background-color: rgba(0, 160, 214, 0.1); color: #00A0D6;">
+                        <i class="bi bi-sliders"></i>
+                    </div>
+                    <h5 class="feature-title">Rule-Based Reasoning</h5>
+                    <p class="feature-desc">
+                        Applies structured IF–THEN rules to identify suitable elective courses.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card 3: Default Reasoning -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper" style="background-color: rgba(99, 102, 241, 0.1); color: #6366F1;">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                    <h5 class="feature-title">Default Reasoning</h5>
+                    <p class="feature-desc">
+                        Handles incomplete student information using carefully defined fallback reasoning.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card 4: Forward Chaining -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper" style="background-color: rgba(139, 92, 246, 0.1); color: #8B5CF6;">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <h5 class="feature-title">Forward Chaining</h5>
+                    <p class="feature-desc">
+                        Derives new conclusions from known student facts and activated recommendation rules.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     3. How It Works Section
+     ========================================================================== -->
+<section id="how-it-works" class="how-it-works-section">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="text-center mb-5">
+            <span class="section-badge">
+                <i class="bi bi-gear-wide-connected me-1"></i>Decision Architecture
+            </span>
+            <h2 class="section-title mb-2">How Course Recommendation Works</h2>
+            <p class="section-subtitle">
+                A structured four-step reasoning pipeline from student academic details to explainable elective rankings.
+            </p>
+        </div>
+
+        <!-- 4-Step Process Grid -->
+        <div class="row g-4 position-relative">
+            <!-- Step 1: Student Profile -->
+            <div class="col-md-6 col-lg-3">
+                <div class="step-card">
+                    <div class="step-badge">01</div>
+                    <div class="feature-icon-wrapper mb-3" style="background-color: rgba(8, 127, 229, 0.08); color: #087FE5; width: 44px; height: 44px; font-size: 1.25rem;">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <h5 class="step-title">Student Profile</h5>
+                    <p class="step-desc">
+                        Students provide academic details, interests, CGPA, and career goals.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2: Knowledge Processing -->
+            <div class="col-md-6 col-lg-3">
+                <div class="step-card">
+                    <div class="step-badge">02</div>
+                    <div class="feature-icon-wrapper mb-3" style="background-color: rgba(0, 160, 214, 0.08); color: #00A0D6; width: 44px; height: 44px; font-size: 1.25rem;">
+                        <i class="bi bi-database-gear"></i>
+                    </div>
+                    <h5 class="step-title">Knowledge Processing</h5>
+                    <p class="step-desc">
+                        The system retrieves relevant knowledge from its Knowledge Base.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 3: AI Reasoning -->
+            <div class="col-md-6 col-lg-3">
+                <div class="step-card">
+                    <div class="step-badge">03</div>
+                    <div class="feature-icon-wrapper mb-3" style="background-color: rgba(99, 102, 241, 0.08); color: #6366F1; width: 44px; height: 44px; font-size: 1.25rem;">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <h5 class="step-title">AI Reasoning</h5>
+                    <p class="step-desc">
+                        Rule-Based Reasoning, Default Reasoning, and Forward Chaining process the available information.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 4: Course Recommendations -->
+            <div class="col-md-6 col-lg-3">
+                <div class="step-card">
+                    <div class="step-badge">04</div>
+                    <div class="feature-icon-wrapper mb-3" style="background-color: rgba(22, 163, 106, 0.08); color: #16A36A; width: 44px; height: 44px; font-size: 1.25rem;">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                    <h5 class="step-title">Course Recommendations</h5>
+                    <p class="step-desc">
+                        The Inference Engine produces suitable recommendations with explanations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================================================================
+     4. Final Call-to-Action Section
+     ========================================================================== -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-card text-center">
+            <div class="position-relative" style="z-index: 2;">
+                <span class="badge bg-white-subtle text-white border border-light-subtle rounded-pill px-3 py-1 small mb-3">
+                    <i class="bi bi-rocket-takeoff me-1"></i>Start Exploring
+                </span>
+                <h2 class="cta-title">Your Academic Journey Starts with the Right Choice</h2>
+                <p class="cta-desc">
+                    Explore suitable elective courses and make decisions that align with your interests and future career goals.
+                </p>
+                <div>
+                    {% if session.get('user_id') %}
+                        {% if session.get('role') == 'admin' %}
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn-cta-light">
+                                <span>Go to Dashboard</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('student.dashboard') }}" class="btn-cta-light">
+                                <span>Open Student Dashboard</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn-cta-light">
+                            <span>Get Started</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

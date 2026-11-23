@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Student Profile — Course Recommendation System{% endblock %}
+{% block title %}My Student Profile — CourseRecommender AI{% endblock %}
 
 {% block content %}
 <div class="container my-4">
@@ -10,9 +10,9 @@
             <div>
                 <span class="badge bg-white text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Student Account</span>
                 <h2 class="fw-bold mb-1"><i class="bi bi-person-circle me-2"></i>My Student Profile</h2>
-                <p class="mb-0 text-white-50">Review and update your personal and institutional student details.</p>
+                <p class="mb-0 text-white-50">Review and manage your personal identity, academic credentials, and AI advisory profile.</p>
             </div>
-            <a href="{{ url_for('student.dashboard') }}" class="btn btn-light text-primary fw-semibold mt-3 mt-md-0">
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-light text-primary fw-semibold mt-3 mt-md-0 shadow-sm">
                 <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
             </a>
         </div>
@@ -25,41 +25,118 @@
             {% include 'components/student_sidebar.html' %}
         </div>
 
-        <!-- Main Profile Form -->
+        <!-- Main Profile Content -->
         <div class="col-lg-9">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-person-gear text-primary me-2"></i>Profile Information</h5>
-                        <p class="text-muted small mb-0">Update your student name, roll number, department, and standing semester.</p>
-                    </div>
-                    <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill">
-                        Role: {{ profile.role|capitalize }}
-                    </span>
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST" action="{{ url_for('student.profile') }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <form method="POST" action="{{ url_for('student.profile') }}" enctype="multipart/form-data" id="profileForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="remove_photo" id="removePhotoInput" value="0">
 
-                        <div class="row g-3 mb-4">
+                <!-- 1. Avatar & Profile Summary Card -->
+                <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+                            <!-- Circular Avatar with Live Preview -->
+                            <div class="position-relative flex-shrink-0 text-center">
+                                <img id="profileAvatarImg" 
+                                     src="{{ student_avatar_url(profile) }}" 
+                                     alt="{{ profile.full_name }}" 
+                                     class="rounded-circle border border-3 border-primary shadow object-fit-cover bg-white" 
+                                     style="width: 120px; height: 120px;">
+                                
+                                <div class="mt-2">
+                                    {% if profile.profile_photo %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small" id="avatarStatusBadge">
+                                            <i class="bi bi-check-circle me-1"></i>Custom Photo
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small" id="avatarStatusBadge">
+                                            <i class="bi bi-stars me-1"></i>Default ({{ profile.gender or 'Neutral' }})
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Student Identity & Photo Action Buttons -->
+                            <div class="flex-grow-1 text-center text-md-start">
+                                <h3 class="fw-bold text-dark mb-1">{{ profile.full_name }}</h3>
+                                <p class="text-muted small mb-2">
+                                    <span class="fw-semibold text-primary">{{ profile.roll_number }}</span> • 
+                                    <span>{{ profile.department }}</span> • 
+                                    <span>Semester {{ profile.semester }}</span>
+                                </p>
+                                
+                                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start mb-3">
+                                    <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill">
+                                        <i class="bi bi-gender-ambiguous me-1"></i>Gender: {{ profile.gender or 'Prefer not to say' }}
+                                    </span>
+                                    <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill">
+                                        <i class="bi bi-award me-1"></i>CGPA: {{ "%.2f"|format(profile.cgpa) }}
+                                    </span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+                                        <i class="bi bi-shield-check me-1"></i>{{ profile.role|capitalize }}
+                                    </span>
+                                </div>
+
+                                <!-- Photo Upload & Remove Buttons -->
+                                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+                                    <label for="profilePhotoInput" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-semibold cursor-pointer mb-0">
+                                        <i class="bi bi-camera-fill me-1"></i>Change Photo
+                                    </label>
+                                    <input type="file" id="profilePhotoInput" name="profile_photo" class="d-none" accept=".jpg,.jpeg,.png,.webp">
+
+                                    {% if profile.profile_photo %}
+                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold" id="btnRemovePhoto">
+                                            <i class="bi bi-trash3 me-1"></i>Remove Photo
+                                        </button>
+                                    {% endif %}
+
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 d-none" id="btnCancelPhoto">
+                                        <i class="bi bi-x-circle me-1"></i>Cancel Photo Selection
+                                    </button>
+                                </div>
+                                <div class="text-muted small mt-1" style="font-size: 0.725rem;">
+                                    Accepts JPG, JPEG, PNG, WEBP (Max 2MB).
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Editable Personal & Academic Form Details -->
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-person-gear text-primary me-2"></i>Personal &amp; Institutional Information
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="full_name" class="form-label fw-semibold small">Full Name</label>
+                                <label for="full_name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="full_name" name="full_name" value="{{ profile.full_name }}" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="roll_number" class="form-label fw-semibold small">Roll / Student ID</label>
+                                <label for="roll_number" class="form-label fw-semibold small">Roll / Student ID <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="roll_number" name="roll_number" value="{{ profile.roll_number }}" required>
                             </div>
-                            <div class="col-md-6">
-                                <label for="department" class="form-label fw-semibold small">Department</label>
+                            <div class="col-md-4">
+                                <label for="genderSelect" class="form-label fw-semibold small">Gender <span class="text-danger">*</span></label>
+                                <select class="form-select" id="genderSelect" name="gender" required>
+                                    <option value="Prefer not to say" {% if profile.gender == 'Prefer not to say' or not profile.gender %}selected{% endif %}>Prefer not to say</option>
+                                    <option value="Male" {% if profile.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if profile.gender == 'Female' %}selected{% endif %}>Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="department" class="form-label fw-semibold small">Department <span class="text-danger">*</span></label>
                                 <select class="form-select" id="department" name="department" required>
                                     {% for dept in ['Computer Science', 'Software Engineering', 'Data Science', 'Information Technology', 'Artificial Intelligence'] %}
                                         <option value="{{ dept }}" {% if profile.department == dept %}selected{% endif %}>{{ dept }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label for="semester" class="form-label fw-semibold small">Current Semester</label>
+                            <div class="col-md-4">
+                                <label for="semester" class="form-label fw-semibold small">Current Semester <span class="text-danger">*</span></label>
                                 <select class="form-select" id="semester" name="semester" required>
                                     {% for sem in range(1, 9) %}
                                         <option value="{{ sem }}" {% if profile.semester == sem %}selected{% endif %}>Semester {{ sem }}</option>
@@ -69,7 +146,7 @@
                             <div class="col-md-6">
                                 <label for="username" class="form-label fw-semibold small">Account Username</label>
                                 <input type="text" class="form-control bg-light" id="username" value="{{ profile.username }}" readonly>
-                                <div class="form-text small">Usernames are fixed identifiers.</div>
+                                <div class="form-text small">Usernames are fixed system identifiers.</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="email" class="form-label fw-semibold small">Registered Email Address</label>
@@ -78,16 +155,176 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <div class="d-flex justify-content-end gap-2 pt-4 mt-3 border-top">
                             <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary px-4">Cancel</a>
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm" id="btnSaveProfile">
                                 <i class="bi bi-check2-circle me-1"></i>Save Profile Changes
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+
+                <!-- 3. AI Academic Context: Interests & Career Goals Cards -->
+                <div class="row g-4 mb-4">
+                    <!-- Career Goals Card -->
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0 rounded-4 h-100">
+                            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-compass text-primary me-2"></i>Target Career Goal
+                                </h6>
+                                <a href="{{ url_for('student.career_goals') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    Update Goal
+                                </a>
+                            </div>
+                            <div class="card-body p-4">
+                                {% if profile.career_goal_name %}
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <div class="fw-bold text-dark mb-1">{{ profile.career_goal_name }}</div>
+                                        <p class="text-muted small mb-0">{{ profile.career_goal_description or 'No description provided.' }}</p>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-3 text-muted small">
+                                        <i class="bi bi-info-circle fs-4 d-block mb-1 text-primary"></i>
+                                        No career goal selected yet.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domain Interests Card -->
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0 rounded-4 h-100">
+                            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-tags text-primary me-2"></i>Academic Interests
+                                </h6>
+                                <a href="{{ url_for('student.interests') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    Manage Interests
+                                </a>
+                            </div>
+                            <div class="card-body p-4">
+                                {% if interests %}
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for interest in interests %}
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
+                                                <i class="bi bi-check2 me-1"></i>{{ interest }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-3 text-muted small">
+                                        <i class="bi bi-info-circle fs-4 d-block mb-1 text-primary"></i>
+                                        No interests selected yet.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const photoInput = document.getElementById('profilePhotoInput');
+    const avatarImg = document.getElementById('profileAvatarImg');
+    const avatarStatusBadge = document.getElementById('avatarStatusBadge');
+    const genderSelect = document.getElementById('genderSelect');
+    const btnRemovePhoto = document.getElementById('btnRemovePhoto');
+    const btnCancelPhoto = document.getElementById('btnCancelPhoto');
+    const removePhotoInput = document.getElementById('removePhotoInput');
+    const btnSaveProfile = document.getElementById('btnSaveProfile');
+    const profileForm = document.getElementById('profileForm');
+
+    // Default Avatar URLs
+    const maleAvatarUrl = "{{ url_for('static', filename='images/avatars/avatar-male.svg') }}";
+    const femaleAvatarUrl = "{{ url_for('static', filename='images/avatars/avatar-female.svg') }}";
+    const neutralAvatarUrl = "{{ url_for('static', filename='images/avatars/avatar-neutral.svg') }}";
+
+    const originalAvatarSrc = avatarImg.src;
+    const hasExistingCustomPhoto = {% if profile.profile_photo %}true{% else %}false{% endif %};
+
+    function getDefaultAvatarForGender(gender) {
+        if (gender === 'Male') return maleAvatarUrl;
+        if (gender === 'Female') return femaleAvatarUrl;
+        return neutralAvatarUrl;
+    }
+
+    // Dynamic gender avatar preview when no custom photo exists
+    genderSelect.addEventListener('change', function () {
+        if (!hasExistingCustomPhoto && (!photoInput.files || !photoInput.files[0])) {
+            avatarImg.src = getDefaultAvatarForGender(this.value);
+            avatarStatusBadge.textContent = 'Default (' + this.value + ')';
+        }
+    });
+
+    // File input change handler with instant client preview
+    photoInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            // Check size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert("File size exceeds 2 MB. Please select a smaller photo.");
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                avatarImg.src = e.target.result;
+                avatarStatusBadge.textContent = 'New Photo (Unsaved)';
+                avatarStatusBadge.className = 'badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill small';
+                btnCancelPhoto.classList.remove('d-none');
+                removePhotoInput.value = '0';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Cancel un-saved photo selection
+    btnCancelPhoto.addEventListener('click', function () {
+        photoInput.value = '';
+        btnCancelPhoto.classList.add('d-none');
+        avatarImg.src = originalAvatarSrc;
+        removePhotoInput.value = '0';
+        if (hasExistingCustomPhoto) {
+            avatarStatusBadge.textContent = 'Custom Photo';
+            avatarStatusBadge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill small';
+        } else {
+            const gender = genderSelect.value;
+            avatarImg.src = getDefaultAvatarForGender(gender);
+            avatarStatusBadge.textContent = 'Default (' + gender + ')';
+            avatarStatusBadge.className = 'badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small';
+        }
+    });
+
+    // Remove photo button handler
+    if (btnRemovePhoto) {
+        btnRemovePhoto.addEventListener('click', function () {
+            if (confirm("Are you sure you want to remove your profile photo and revert to the default avatar?")) {
+                removePhotoInput.value = '1';
+                photoInput.value = '';
+                const gender = genderSelect.value;
+                avatarImg.src = getDefaultAvatarForGender(gender);
+                avatarStatusBadge.textContent = 'Reverting to Default on Save';
+                avatarStatusBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill small';
+                btnRemovePhoto.classList.add('d-none');
+                btnCancelPhoto.classList.remove('d-none');
+            }
+        });
+    }
+
+    // Form submit loading state
+    profileForm.addEventListener('submit', function () {
+        btnSaveProfile.disabled = true;
+        btnSaveProfile.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving changes...';
+    });
+});
+</script>
 {% endblock %}

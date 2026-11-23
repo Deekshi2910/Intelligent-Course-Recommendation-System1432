@@ -10,6 +10,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, flash,
 from database.db_connection import get_db_cursor
 from routes.decorators import student_required, no_cache
 from mysql.connector import Error
+from routes.upload_helper import validate_and_save_profile_photo, delete_profile_photo
 from ai_engine.rule_evaluator import evaluate_rules
 from ai_engine.default_reasoning import DefaultReasoningEngine, infer_with_defaults
 from ai_engine.inference_engine import InferenceEngine, generate_recommendations
@@ -33,6 +34,8 @@ def get_current_student_profile(user_id):
                 sp.department,
                 sp.semester,
                 sp.cgpa,
+                sp.gender,
+                sp.profile_photo,
                 sp.career_goal_id,
                 u.username,
                 u.email,
@@ -114,8 +117,8 @@ def dashboard():
 @no_cache
 def profile():
     """
-    Allows students to view their profile and update full name, department,
-    semester, and roll number.
+    Allows students to view their profile, manage profile photo, and update personal details.
+    Includes gender, academic metrics, career goals, and domain interests.
     Strictly disallows modifying user account role.
     """
     user_id = session.get("user_id")
@@ -125,28 +128,67 @@ def profile():
         flash("Student profile record not found.", "danger")
         return redirect(url_for("auth.login"))
 
+    # Fetch linked interests for complete profile presentation
+    interests = []
+    try:
+        with get_db_cursor(dictionary=True) as (cursor, _):
+            cursor.execute("""
+                SELECT i.interest_name
+                FROM student_interests si
+                JOIN interests i ON si.interest_id = i.id
+                WHERE si.student_id = %s
+                ORDER BY i.interest_name ASC
+            """, (profile_data["id"],))
+            interests = [r["interest_name"] for r in cursor.fetchall()]
+    except Exception:
+        interests = []
+
     if request.method == "POST":
         full_name = request.form.get("full_name", "").strip()
         roll_number = request.form.get("roll_number", "").strip()
         department = request.form.get("department", "").strip()
         semester = request.form.get("semester", type=int)
+        gender = request.form.get("gender", profile_data.get("gender") or "Prefer not to say").strip()
+
+        if gender not in {"Male", "Female", "Prefer not to say"}:
+            gender = "Prefer not to say"
 
         # Validation
         if not full_name or len(full_name) < 2:
             flash("Full name must be at least 2 characters long.", "danger")
-            return render_template("student_profile.html", profile=profile_data)
+            return render_template("student_profile.html", profile=profile_data, interests=interests)
 
         if not roll_number:
             flash("Roll number is required.", "danger")
-            return render_template("student_profile.html", profile=profile_data)
+            return render_template("student_profile.html", profile=profile_data, interests=interests)
 
         if not department:
             flash("Department is required.", "danger")
-            return render_template("student_profile.html", profile=profile_data)
+            return render_template("student_profile.html", profile=profile_data, interests=interests)
 
         if semester is None or semester < 1 or semester > 12:
             flash("Semester must be between 1 and 12.", "danger")
-            return render_template("student_profile.html", profile=profile_data)
+            return render_template("student_profile.html", profile=profile_data, interests=interests)
+
+        current_photo = profile_data.get("profile_photo")
+        new_photo = current_photo
+
+        # Handle Photo Removal
+        if request.form.get("remove_photo") == "1":
+            if current_photo:
+                delete_profile_photo(current_photo)
+            new_photo = None
+        else:
+            # Handle Photo Upload
+            photo_file = request.files.get("profile_photo")
+            if photo_file and photo_file.filename:
+                saved_path, err = validate_and_save_profile_photo(photo_file, user_id)
+                if err:
+                    flash(f"Profile photo error: {err}", "danger")
+                    return render_template("student_profile.html", profile=profile_data, interests=interests)
+                if current_photo and current_photo != saved_path:
+                    delete_profile_photo(current_photo)
+                new_photo = saved_path
 
         try:
             with get_db_cursor(commit=True, dictionary=True) as (cursor, _):
@@ -157,21 +199,26 @@ def profile():
                 )
                 if cursor.fetchone():
                     flash("This roll number is already assigned to another student profile.", "warning")
-                    return render_template("student_profile.html", profile=profile_data)
+                    return render_template("student_profile.html", profile=profile_data, interests=interests)
 
                 # Update student profile
                 cursor.execute("""
                     UPDATE student_profiles
-                    SET full_name = %s, roll_number = %s, department = %s, semester = %s
+                    SET full_name = %s, roll_number = %s, department = %s, semester = %s,
+                        gender = %s, profile_photo = %s
                     WHERE id = %s AND user_id = %s
-                """, (full_name, roll_number, department, semester, profile_data["id"], user_id))
+                """, (full_name, roll_number, department, semester, gender, new_photo, profile_data["id"], user_id))
+
+            # Sync session attributes
+            session["gender"] = gender
+            session["profile_photo"] = new_photo
 
             flash("Student profile updated successfully!", "success")
             return redirect(url_for("student.profile"))
         except Error as err:
             flash("Database error while updating profile.", "danger")
 
-    return render_template("student_profile.html", profile=profile_data)
+    return render_template("student_profile.html", profile=profile_data, interests=interests)
 
 
 @student_bp.route("/academic", methods=["GET", "POST"])

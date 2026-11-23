@@ -1,55 +1,348 @@
 {% extends "base.html" %}
 
-{% block title %}Administrator Sign In — Course Recommendation System{% endblock %}
+{% block title %}Administrator Sign In — CourseRecommender AI{% endblock %}
+
+{% block navbar %}{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block main_class %}p-0 min-vh-100{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-dark text-white rounded-circle mb-3 shadow-sm" style="width: 58px; height: 58px;">
-                            <i class="bi bi-shield-lock-fill fs-4"></i>
+<div class="auth-split-wrapper">
+    <!-- ====================================================================
+         LEFT PANEL (46% Width) – Modern Blue Gradient Branding & AI Visual
+         ==================================================================== -->
+    <div class="auth-split-left">
+        <!-- TOP LEFT: Graduation Cap Icon & Branding -->
+        <div>
+            <a href="{{ url_for('home') }}" class="auth-brand-badge" title="Return to Homepage">
+                <span class="auth-brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </span>
+                <span class="auth-brand-name">
+                    CourseRecommender <span class="auth-brand-accent">AI</span>
+                </span>
+            </a>
+        </div>
+
+        <!-- MAIN HERO CONTENT & AI DASHBOARD ILLUSTRATION -->
+        <div class="auth-left-body">
+            <h1 class="auth-hero-title">
+                Shape Your Future.<br>
+                <span class="auth-hero-title-accent">Choose Smarter.</span>
+            </h1>
+            <p class="auth-hero-desc">
+                Discover the right elective courses for your academic journey. Our intelligent recommendation system combines student interests, academic performance, and career goals to guide better decisions.
+            </p>
+
+            <!-- Glassmorphism AI Recommendation Dashboard Card -->
+            <div class="auth-glass-card">
+                <!-- Header -->
+                <div class="auth-glass-header">
+                    <h6 class="auth-glass-title">
+                        <i class="bi bi-cpu-fill text-warning"></i>
+                        <span>AI Recommendation Insights</span>
+                    </h6>
+                    <span class="auth-glass-badge">
+                        <i class="bi bi-circle-fill text-success" style="font-size: 6px;"></i> Live Simulation
+                    </span>
+                </div>
+
+                <!-- Student Profile Row -->
+                <div class="auth-glass-student-row">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-white text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                            CS
                         </div>
-                        <h3 class="fw-bold text-dark">Admin Portal</h3>
-                        <p class="text-muted small">Sign in with authorized administrator credentials</p>
-                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill">
-                            Restricted Access
-                        </span>
+                        <div>
+                            <div class="fw-semibold text-white">Student Profile: CSE</div>
+                            <div style="font-size: 0.72rem; opacity: 0.85;">Semester 6 • Core Elective Track</div>
+                        </div>
                     </div>
-
-                    <form method="POST" action="{{ url_for('admin.login') }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                        <div class="mb-3">
-                            <label for="identifier" class="form-label fw-semibold small">Admin Username or Email</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-fill-gear text-muted"></i></span>
-                                <input type="text" class="form-control border-start-0 ps-0" id="identifier" name="identifier" placeholder="Enter admin username or email" required autofocus>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="password" class="form-label fw-semibold small">Admin Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-key-fill text-muted"></i></span>
-                                <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" placeholder="Enter password" required>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-dark w-100 py-2 fw-semibold shadow-sm mb-3">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Authenticate Administrator
-                        </button>
-                    </form>
-
-                    <div class="text-center text-muted small mt-4 pt-3 border-top">
-                        Are you a student? 
-                        <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold text-decoration-none">Go to Student Login</a>
+                    <div class="text-end">
+                        <span class="badge bg-white text-dark fw-bold px-2 py-1" style="font-size: 0.75rem;">CGPA 8.75</span>
                     </div>
                 </div>
+
+                <!-- Academic Interests & Career Goals -->
+                <div class="auth-glass-tags">
+                    <span class="auth-glass-pill"><i class="bi bi-stars me-1 text-warning"></i>Machine Learning</span>
+                    <span class="auth-glass-pill"><i class="bi bi-cloud-arrow-up me-1 text-info"></i>Cloud Systems</span>
+                    <span class="auth-glass-pill"><i class="bi bi-bullseye me-1 text-success"></i>Goal: AI Engineer</span>
+                </div>
+
+                <!-- Recommended Courses Cards -->
+                <div class="auth-glass-course-item">
+                    <div>
+                        <div class="auth-glass-course-title">CS-402: Deep Learning &amp; Neural Nets</div>
+                        <div class="auth-glass-course-meta">Prerequisites Met • Rule #104</div>
+                    </div>
+                    <span class="auth-glass-score">98% Match</span>
+                </div>
+
+                <div class="auth-glass-course-item mb-0">
+                    <div>
+                        <div class="auth-glass-course-title">CS-415: Cloud Computing &amp; Scalability</div>
+                        <div class="auth-glass-course-meta">Career Goal Aligned • Rule #108</div>
+                    </div>
+                    <span class="auth-glass-score">94% Match</span>
+                </div>
+
+                <div class="text-white-50 text-center mt-2" style="font-size: 0.72rem;">
+                    <i class="bi bi-info-circle me-1"></i>Visual simulation preview of multi-paradigm AI reasoning
+                </div>
+            </div>
+
+            <!-- Three Small Benefit Indicators -->
+            <div class="auth-benefit-list">
+                <div class="auth-benefit-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Intelligent Course Matching</span>
+                </div>
+                <div class="auth-benefit-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Knowledge-Based Reasoning</span>
+                </div>
+                <div class="auth-benefit-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Personalized Academic Guidance</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM LEFT: Copyright -->
+        <div class="auth-left-footer">
+            &copy; 2026 CourseRecommender AI. AI Lab Project.
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         RIGHT PANEL (54% Width) – Clean White Modern Authentication Interface
+         ==================================================================== -->
+    <div class="auth-split-right">
+        <!-- Top Right Navigation & Theme Controls -->
+        <div class="auth-top-nav">
+            <a href="{{ url_for('home') }}" class="btn-auth-back">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to Home</span>
+            </a>
+            <button type="button" class="btn-auth-theme global-theme-toggle" id="authThemeToggle" title="Switch to Dark Mode" aria-label="Toggle theme">
+                <i class="bi bi-moon-stars-fill theme-icon-moon"></i>
+                <i class="bi bi-sun-fill theme-icon-sun d-none text-warning"></i>
+            </button>
+        </div>
+
+        <!-- Centered Login Content Container -->
+        <div class="auth-form-card">
+            <!-- Flashed Messages Container -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-3">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if category == 'danger' %}
+                                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                    {% elif category == 'success' %}
+                                        <i class="bi bi-check-circle-fill fs-5"></i>
+                                    {% else %}
+                                        <i class="bi bi-info-circle-fill fs-5"></i>
+                                    {% endif %}
+                                    <div class="small">{{ message }}</div>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Header -->
+            <div class="auth-form-header">
+                <h2 class="auth-form-title" id="formHeaderTitle">Admin Portal</h2>
+                <p class="auth-form-subtitle" id="formHeaderSubtitle">Sign in with authorized administrator credentials.</p>
+            </div>
+
+            <!-- Role Selection Interface (Two Horizontal Options) -->
+            <div class="auth-role-selector" role="tablist" aria-label="Authentication Role Selector">
+                <!-- Option 1: Student -->
+                <button type="button" class="auth-role-btn role-student" id="roleBtnStudent" role="tab" aria-selected="false">
+                    <span class="auth-role-icon"><i class="bi bi-mortarboard-fill"></i></span>
+                    <span class="auth-role-label">Student</span>
+                    <span class="auth-role-sub">Learner Portal</span>
+                </button>
+                <!-- Option 2: Admin (Active by default on admin_login) -->
+                <button type="button" class="auth-role-btn active role-admin" id="roleBtnAdmin" role="tab" aria-selected="true">
+                    <span class="auth-role-icon"><i class="bi bi-shield-lock-fill"></i></span>
+                    <span class="auth-role-label">Admin</span>
+                    <span class="auth-role-sub">Faculty &amp; Staff</span>
+                </button>
+            </div>
+
+            <!-- Authentication Form -->
+            <form method="POST" action="{{ url_for('admin.login') }}" id="loginForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- Field 1: Identifier (Admin Username or Email) -->
+                <div class="auth-form-group">
+                    <label for="identifier" class="auth-form-label" id="identifierLabel">Admin Username or Email</label>
+                    <div class="auth-input-group">
+                        <span class="auth-input-icon">
+                            <i class="bi bi-person-fill-gear" id="identifierIcon"></i>
+                        </span>
+                        <input type="text" class="auth-input-field" id="identifier" name="identifier" placeholder="Enter admin username or email" required autofocus autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Field 2: Admin Password with Visibility Toggle -->
+                <div class="auth-form-group">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="password" class="auth-form-label mb-0" id="passwordLabel">Admin Password</label>
+                    </div>
+                    <div class="auth-input-group">
+                        <span class="auth-input-icon">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                        <input type="password" class="auth-input-field has-toggle" id="password" name="password" placeholder="Enter admin password" required autocomplete="current-password">
+                        <button type="button" class="auth-password-toggle" id="togglePasswordBtn" title="Show or hide password" aria-label="Toggle password visibility">
+                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Primary Action Button with Loading State -->
+                <button type="submit" class="btn-auth-primary btn-auth-admin" id="submitBtn">
+                    <i class="bi bi-shield-lock-fill" id="submitBtnIcon"></i>
+                    <span id="submitBtnText">Authenticate Administrator</span>
+                </button>
+            </form>
+
+            <!-- Bottom Registration Link (Student) -->
+            <div class="auth-form-footer d-none" id="studentFooter">
+                <span>Don't have an account?</span>
+                <a href="{{ url_for('auth.register') }}" class="text-primary fw-semibold text-decoration-none ms-1">Register</a>
+            </div>
+
+            <!-- Bottom Admin Notice (Admin) -->
+            <div class="auth-form-footer" id="adminFooter">
+                <span class="text-muted small">
+                    <i class="bi bi-shield-check text-secondary me-1"></i>Administrator accounts are provisioned by system staff.
+                </span>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const roleBtnStudent = document.getElementById('roleBtnStudent');
+    const roleBtnAdmin = document.getElementById('roleBtnAdmin');
+    const loginForm = document.getElementById('loginForm');
+    const formHeaderTitle = document.getElementById('formHeaderTitle');
+    const formHeaderSubtitle = document.getElementById('formHeaderSubtitle');
+    const identifierLabel = document.getElementById('identifierLabel');
+    const identifier = document.getElementById('identifier');
+    const identifierIcon = document.getElementById('identifierIcon');
+    const passwordLabel = document.getElementById('passwordLabel');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitBtnIcon = document.getElementById('submitBtnIcon');
+    const submitBtnText = document.getElementById('submitBtnText');
+    const studentFooter = document.getElementById('studentFooter');
+    const adminFooter = document.getElementById('adminFooter');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+    const authThemeToggle = document.getElementById('authThemeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    // Route actions
+    const studentLoginUrl = "{{ url_for('auth.login') }}";
+    const adminLoginUrl = "{{ url_for('admin.login') }}";
+
+    function setRole(role) {
+        if (role === 'student') {
+            roleBtnStudent.classList.add('active');
+            roleBtnAdmin.classList.remove('active');
+            roleBtnStudent.setAttribute('aria-selected', 'true');
+            roleBtnAdmin.setAttribute('aria-selected', 'false');
+
+            loginForm.action = studentLoginUrl;
+            formHeaderTitle.textContent = "Welcome Back";
+            formHeaderSubtitle.textContent = "Sign in to continue your academic journey.";
+            identifierLabel.textContent = "Username or Email";
+            identifier.placeholder = "Enter your username or email";
+            identifierIcon.className = "bi bi-person";
+            passwordLabel.textContent = "Password";
+            passwordInput.placeholder = "Enter your password";
+
+            submitBtn.className = "btn-auth-primary";
+            submitBtnIcon.className = "bi bi-box-arrow-in-right";
+            submitBtnText.textContent = "Sign In";
+
+            studentFooter.classList.remove('d-none');
+            adminFooter.classList.add('d-none');
+        } else {
+            roleBtnAdmin.classList.add('active');
+            roleBtnStudent.classList.remove('active');
+            roleBtnAdmin.setAttribute('aria-selected', 'true');
+            roleBtnStudent.setAttribute('aria-selected', 'false');
+
+            loginForm.action = adminLoginUrl;
+            formHeaderTitle.textContent = "Admin Portal";
+            formHeaderSubtitle.textContent = "Sign in with authorized administrator credentials.";
+            identifierLabel.textContent = "Admin Username or Email";
+            identifier.placeholder = "Enter admin username or email";
+            identifierIcon.className = "bi bi-person-fill-gear";
+            passwordLabel.textContent = "Admin Password";
+            passwordInput.placeholder = "Enter admin password";
+
+            submitBtn.className = "btn-auth-primary btn-auth-admin";
+            submitBtnIcon.className = "bi bi-shield-lock-fill";
+            submitBtnText.textContent = "Authenticate Administrator";
+
+            studentFooter.classList.add('d-none');
+            adminFooter.classList.remove('d-none');
+        }
+    }
+
+    roleBtnStudent.addEventListener('click', function () {
+        setRole('student');
+        identifier.focus();
+    });
+
+    roleBtnAdmin.addEventListener('click', function () {
+        setRole('admin');
+        identifier.focus();
+    });
+
+    // Password visibility toggle
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', function () {
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            togglePasswordIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+            passwordInput.focus();
+        });
+    }
+
+    // Submit button loading state
+    if (loginForm) {
+        loginForm.addEventListener('submit', function (e) {
+            if (identifier.value.trim() && passwordInput.value) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><span>Authenticating...</span>';
+                setTimeout(function () {
+                    submitBtn.disabled = false;
+                    const isAdmin = roleBtnAdmin.classList.contains('active');
+                    submitBtn.innerHTML = isAdmin 
+                        ? '<i class="bi bi-shield-lock-fill me-2"></i>Authenticate Administrator'
+                        : '<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';
+                }, 8000);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

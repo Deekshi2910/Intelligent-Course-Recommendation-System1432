@@ -41,9 +41,12 @@ The **Intelligent Course Recommendation System** solves this by formalizing acad
 - **Scorer & Ranker (`recommendation_scorer.py`, `course_ranker.py`)**: Multi-factor scoring (Interest Match 40%, Career Alignment 35%, CGPA Clearance 15%, Prerequisite Factor 10%) and tiered categorization (*Highly Recommended*, *Recommended*, *Alternative Option*).
 - **Explainable AI (XAI) (`explanation_generator.py`, `reasoning_logger.py`)**: Full transparency with natural-language justifications, rule citations, assumption disclaimers, and audit trails.
 
-### 2. Student Experience
-- **Secure Authentication**: Registration, bcrypt hashing, password validation, role-based access.
-- **Student Profile Management**: Real-time CGPA tracking, semester/department details, career goal selection.
+### 2. Student Experience & Modern UI/UX
+- **Redesigned Landing Page & Authentication Portals**: Modern SaaS aesthetics featuring glassmorphism cards, split-screen brand showcases, live metrics cards, and responsive layouts.
+- **Global Light & Dark Theme**: Universal theme switch in the top navigation bar with persistent client state (via `localStorage` and CSS design tokens).
+- **Profile Photo Upload & Avatar Management**: Optional photo upload with client-side preview, automatic server-side image processing, thumbnail generation, removal options, and fallback gender-based vector avatars (male, female, neutral).
+- **Secure Authentication**: Registration, bcrypt hashing, password visibility toggle, role-based access control.
+- **Student Profile Management**: Real-time CGPA tracking, semester/department details, gender selection, and career goal selection.
 - **Interactive Domain Interests**: Multi-select tag manager for technical and domain interests.
 - **Personalized Recommendations**: One-click AI evaluation with suitability breakdown, tier badges, and explainability cards.
 - **Interactive Rule Testing Sandbox**: Allows students to test hypothetical CGPA, interests, and career goals against production rules with step-by-step reasoning logs.
@@ -83,40 +86,40 @@ Intelligent-Course-Recommendation/
 │   ├── inference_engine.py            # Central orchestration pipeline
 │   └── reasoning_logger.py            # Audit trail & structured logging
 ├── database/                          # Database connection & schema scripts
-│   ├── db_connection.py               # Parameterized connection pool with retry
-│   ├── schema.sql                     # Complete DDL tables & indexes
+│   ├── db_connection.py               # Parameterized connection pool with TLS/SSL
+│   ├── schema.sql                     # Complete DDL tables, indexes & seed data
 │   └── seed_data.sql                  # Comprehensive seed curriculum data
 ├── routes/                            # Modular Flask Blueprints
 │   ├── __init__.py
 │   ├── auth.py                        # Authentication & registration routes
 │   ├── student.py                     # Student portal & recommendation routes
-│   └── admin.py                       # Admin management & rule routes
+│   ├── admin.py                       # Admin management & rule routes
+│   └── upload_helper.py               # Safe photo upload, resize, and purge
 ├── static/                            # Static assets
 │   ├── css/
-│   │   ├── style.css                  # Custom styling & glassmorphism
+│   │   ├── style.css                  # Custom styling & glassmorphism & themes
 │   │   └── dashboard.css              # Dashboard layout styling
-│   └── js/
-│       ├── main.js                    # Client-side UI enhancements
-│       └── student_interests.js       # Dynamic interest management
+│   ├── images/
+│   │   ├── avatars/                   # Vector avatars (male, female, neutral)
+│   │   └── registration-background.png# Educational auth illustration
+│   ├── js/
+│   │   ├── dashboard.js               # Admin & student dashboard utilities
+│   │   ├── script.js                  # Client-side form helpers & alert dismiss
+│   │   └── theme.js                   # Universal Dark/Light mode engine
+│   └── uploads/
+│       └── profiles/                  # Student profile pictures (.gitkeep)
 ├── templates/                         # Jinja2 Templates (Bootstrap 5)
-│   ├── base.html                      # Root layout with responsive navbar
+│   ├── base.html                      # Root layout with responsive navbar & theme toggle
+│   ├── index.html                     # Redesigned hero landing page
+│   ├── login.html                     # Redesigned student login portal
+│   ├── register.html                  # Redesigned student registration portal
+│   ├── admin_login.html               # Redesigned administrator login portal
 │   ├── student_dashboard.html         # Student portal overview
+│   ├── student_profile.html           # Student profile & photo upload manager
 │   ├── student_recommendations.html   # Detailed recommendation display
 │   ├── student_rule_testing.html      # AI Rule Testing sandbox
-│   ├── student_interests.html         # Student interest selector
-│   ├── student_academic_profile.html  # Student CGPA & profile form
-│   ├── student_career_goal.html       # Career path selector
-│   ├── student_history.html           # Historical recommendation log
 │   ├── admin_dashboard.html           # Admin analytics dashboard
-│   ├── admin_students.html            # Student records & status toggles
-│   ├── admin_courses.html             # Course catalog & management
-│   ├── admin_interests.html           # Interest taxonomy manager
-│   ├── admin_career_goals.html        # Career goal taxonomy manager
-│   ├── admin_rules.html               # Production rule management
-│   ├── admin_default_rules.html       # Default rule administration
-│   ├── admin_kb_audit.html            # Knowledge Base audit dashboard
-│   ├── admin_reports.html             # Analytics & recommendation reports
-│   └── ...                            # Auth, error, and profile templates
+│   └── ...                            # Full administrative & utility templates
 ├── tests/                             # Comprehensive Automated Test Suite
 │   ├── __init__.py
 │   ├── conftest.py                    # Pytest configuration & fixtures
@@ -129,12 +132,14 @@ Intelligent-Course-Recommendation/
 │   ├── test_forward_chaining.py       # Forward chaining & refraction tests
 │   ├── test_inference_engine.py       # Complete inference pipeline tests
 │   └── test_recommendations.py        # End-to-end recommendation tests
-├── app.py                             # Flask Application Entry Point
-├── config.py                          # App & Database Configuration
+├── app.py                             # Flask Application Entry Point & Health Check
+├── config.py                          # App & Database Configuration (MySQL / TiDB)
 ├── create_admin.py                    # CLI Utility to bootstrap admin account
 ├── run_tests.py                       # Automated test runner script
-├── requirements.txt                   # Production dependencies
-├── .env.example                       # Environment template
+├── requirements.txt                   # Production dependencies (Gunicorn, Pillow)
+├── Procfile                           # Gunicorn WSGI start command for cloud hosting
+├── render.yaml                        # Render Cloud Blueprint infrastructure spec
+├── .env.example                       # Environment template with TiDB & SSL specs
 └── README.md                          # Project documentation
 ```
 
@@ -162,8 +167,8 @@ Intelligent-Course-Recommendation/
 
 ### 2. Clone Repository
 ```bash
-git clone https://github.com/your-username/Intelligent-Course-Recommendation.git
-cd Intelligent-Course-Recommendation
+git clone https://github.com/Deekshi2910/Intelligent-Course-Recommendation-System1432.git
+cd Intelligent-Course-Recommendation-System1432
 ```
 
 ### 3. Create & Activate Virtual Environment
@@ -239,6 +244,73 @@ http://127.0.0.1:5000/
 - **Student Portal**:
   - URL: `http://127.0.0.1:5000/login`
   - Register a new account or log in with an existing student account.
+
+---
+
+## ☁️ Cloud Deployment Guide (Render + TiDB Cloud Starter)
+
+The application is fully prepared for free, enterprise-grade cloud deployment using:
+1. **GitHub**: Source code repository.
+2. **TiDB Cloud Starter (Serverless)**: 100% MySQL-compatible managed relational database with automated SSL/TLS encryption.
+3. **Render**: Free cloud application hosting running Gunicorn WSGI.
+
+### Step 1: Set Up TiDB Cloud Starter Database
+1. Sign in to [TiDB Cloud](https://tidbcloud.com/) (free tier, no credit card required).
+2. Create a new **Serverless** cluster (select your preferred cloud region, e.g., AWS US East).
+3. In your cluster dashboard, click **Connect**:
+   - Choose **Connect with: General / MySQL CLI**.
+   - Note down:
+     - **Host**: e.g. `gateway01.us-east-1.prod.aws.tidbcloud.com`
+     - **Port**: `4000`
+     - **User**: e.g. `xxxxxx.root`
+     - **Password**: Generate and copy your cluster root password.
+4. Import the database schema & seed curriculum:
+   - Click **SQL Editor** in the TiDB Cloud Console.
+   - Paste and execute the contents of `database/schema.sql` (or use MySQL CLI/Workbench to run `database/schema.sql`).
+   - This creates all tables, indexes, production rules, default reasoning rules (DR01–DR05), courses, and initial administrative records.
+
+### Step 2: Deploy Web Service to Render
+1. Push your repository to **GitHub**.
+2. Log in to [Render](https://render.com/) and click **New +** -> **Web Service**.
+3. Connect your GitHub repository (`Intelligent-Course-Recommendation-System1432`).
+4. Configure the Web Service settings:
+   - **Name**: `course-recommender-ai`
+   - **Runtime**: `Python 3`
+   - **Branch**: `main`
+   - **Region**: Choose the region closest to your TiDB cluster.
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120`
+   - **Plan**: `Free`
+5. Under **Environment Variables**, add the following:
+
+| Variable | Recommended Production Value | Description |
+| :--- | :--- | :--- |
+| `FLASK_ENV` | `production` | Enables production mode & secure cookies |
+| `FLASK_DEBUG` | `0` | Disables Flask debug mode |
+| `SECRET_KEY` | *(Click "Generate" in Render or use 32+ random chars)* | Cryptographic session & CSRF key |
+| `TIDB_HOST` | `gateway01.us-east-1.prod.aws.tidbcloud.com` | TiDB Serverless Host |
+| `TIDB_PORT` | `4000` | TiDB connection port |
+| `TIDB_USER` | `xxxxxx.root` | TiDB cluster user |
+| `TIDB_PASSWORD` | *(Your TiDB Password)* | TiDB cluster password |
+| `TIDB_DB_NAME` | `intelligent_course_recommendation` | Database name |
+| `DB_SSL_MODE` | `AUTO` | Auto-enables TLS 1.2+ encryption for TiDB |
+| `DB_SSL_VERIFY_CERT` | `1` | Verifies remote SSL certificates |
+| `DB_SSL_VERIFY_IDENTITY` | `1` | Validates host identity against certificate |
+
+*(Alternatively, you can provide a single `DATABASE_URL` containing `mysql://user:pass@host:4000/intelligent_course_recommendation`)*.
+
+6. Under **Health Check Path**, enter:
+   ```text
+   /health
+   ```
+7. Click **Create Web Service**. Render will build the dependencies, launch Gunicorn, verify the `/health` endpoint, and assign a live public HTTPS URL (e.g. `https://course-recommender-ai.onrender.com`).
+
+### 📦 Persistent Storage Note for Profile Photos
+- **Ephemeral Filesystem on Render Free Tier**: Render's free web service disk is ephemeral; uploaded profile photos stored under `static/uploads/profiles/` will reset whenever the web service restarts or redeploys.
+- **Graceful Fallback**: The application handles this safely: if an uploaded image file is missing, the `student_avatar_url` context processor automatically falls back to the clean gender-based SVG avatars without 404 errors or application crashes.
+- **Production Recommendation**: For permanent user photo persistence across redeployments, connect an external object store such as **Cloudinary**, **AWS S3**, or **Cloudflare R2** with a free tier.
+
+---
 
 ---
 

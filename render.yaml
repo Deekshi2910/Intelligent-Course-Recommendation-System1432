@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: intelligent-course-recommender
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DB_SSL_MODE
+        value: AUTO
+      - key: DB_SSL_VERIFY_CERT
+        value: "1"
+      - key: DB_SSL_VERIFY_IDENTITY
+        value: "1"
+      # Configure either TIDB_* or DATABASE_URL in Render Dashboard
+      - key: TIDB_HOST
+        sync: false
+      - key: TIDB_PORT
+        value: "4000"
+      - key: TIDB_USER
+        sync: false
+      - key: TIDB_PASSWORD
+        sync: false
+      - key: TIDB_DB_NAME
+        value: "intelligent_course_recommendation"

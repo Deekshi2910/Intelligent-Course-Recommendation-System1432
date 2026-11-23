@@ -11,7 +11,11 @@ from flask_wtf.csrf import CSRFProtect
 from config import config_by_name
 
 # Determine environment and load configuration
-env_name = os.getenv("FLASK_ENV", "development").lower()
+env_name = (
+    os.getenv("FLASK_ENV")
+    or os.getenv("ENVIRONMENT")
+    or ("production" if os.getenv("RENDER") else "development")
+).lower()
 config_class = config_by_name.get(env_name, config_by_name["default"])
 
 # Initialize Flask with explicit templates and static folder paths
@@ -33,6 +37,45 @@ app.register_blueprint(student_bp)
 app.register_blueprint(admin_bp)
 
 
+# ----------------------------------------------------------------------------
+# Global Jinja2 Context Processors
+# ----------------------------------------------------------------------------
+@app.context_processor
+def inject_avatar_helper():
+    """Provides a global student_avatar_url helper across all templates."""
+    def student_avatar_url(profile_or_gender=None, photo_path=None):
+        gender = "Prefer not to say"
+        photo = None
+
+        if isinstance(profile_or_gender, dict):
+            gender = profile_or_gender.get("gender") or "Prefer not to say"
+            photo = profile_or_gender.get("profile_photo")
+        elif isinstance(profile_or_gender, str):
+            if profile_or_gender in ("Male", "Female", "Prefer not to say"):
+                gender = profile_or_gender
+            else:
+                photo = profile_or_gender
+            if photo_path:
+                photo = photo_path
+
+        if photo:
+            clean_photo = photo.lstrip("/\\")
+            full_path = os.path.join(app.root_path, "static", clean_photo)
+            if os.path.isfile(full_path):
+                from flask import url_for
+                return url_for("static", filename=clean_photo)
+
+        from flask import url_for
+        if gender == "Male":
+            return url_for("static", filename="images/avatars/avatar-male.svg")
+        elif gender == "Female":
+            return url_for("static", filename="images/avatars/avatar-female.svg")
+        else:
+            return url_for("static", filename="images/avatars/avatar-neutral.svg")
+
+    return dict(student_avatar_url=student_avatar_url)
+
+
 @app.route("/", methods=["GET"])
 def home():
     """Home route displaying the application title."""
@@ -48,9 +91,10 @@ def health_check():
     return jsonify({
         "status": "healthy" if db_ok else "degraded",
         "service": "Intelligent Course Recommendation System",
-        "phase": "Phase 6 - AI Knowledge Base",
+        "brand": "CourseRecommender AI",
         "environment": env_name,
-        "database": "connected" if db_ok else "disconnected"
+        "database": "connected" if db_ok else "disconnected",
+        "database_message": db_msg if not db_ok else "Database connection operational"
     }), status_code
 
 
@@ -86,5 +130,7 @@ def reset_admin_password_cli(identifier, password):
 
 
 if __name__ == "__main__":
+    host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 5000))
-    app.run(host="127.0.0.1", port=port, debug=app.config.get("DEBUG", True))
+    debug = app.config.get("DEBUG", False)
+    app.run(host=host, port=port, debug=debug)

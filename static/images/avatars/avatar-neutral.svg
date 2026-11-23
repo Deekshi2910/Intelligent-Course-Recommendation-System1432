@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <!-- Background Circle -->
+  <defs>
+    <linearGradient id="bgGradNeut" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F1F5F9"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <linearGradient id="bodyGradNeut" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#087FE5"/>
+      <stop offset="100%" stop-color="#0A4D94"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="64" fill="url(#bgGradNeut)"/>
+
+  <!-- Academic / Student Shoulders -->
+  <path d="M26 128 C28 98, 44 86, 64 86 C84 86, 100 98, 102 128 Z" fill="url(#bodyGradNeut)"/>
+  <!-- Collegiate V-Ribbon / Stole -->
+  <polygon points="64,88 54,98 64,120 74,98" fill="#FFFFFF"/>
+  <polygon points="64,96 60,118 68,118" fill="#00A0D6"/>
+
+  <!-- Neck -->
+  <rect x="54" y="68" width="20" height="20" rx="3" fill="#E2E8F0"/>
+
+  <!-- Head Base -->
+  <circle cx="64" cy="54" r="22" fill="#CBD5E1"/>
+
+  <!-- Graduation Cap (Unisex / Neutral Academic Emblem) -->
+  <polygon points="64,22 100,34 64,46 28,34" fill="#1E293B"/>
+  <polygon points="64,26 94,36 64,44 34,36" fill="#334155"/>
+  <!-- Cap skull band -->
+  <path d="M44 40 L44 50 C44 57, 84 57, 84 50 L84 40 Z" fill="#0F172A"/>
+  <!-- Tassel -->
+  <path d="M64 34 Q82 38 88 54" stroke="#F59E0B" stroke-width="2" fill="none"/>
+  <circle cx="88" cy="55" r="2.5" fill="#F59E0B"/>
+  <circle cx="64" cy="34" r="2" fill="#F59E0B"/>
+
+  <!-- Subtle Neutral Expression -->
+  <circle cx="54" cy="54" r="2.5" fill="#475467"/>
+  <circle cx="74" cy="54" r="2.5" fill="#475467"/>
+  <path d="M58 64 Q64 68 70 64" stroke="#475467" stroke-width="2" stroke-linecap="round" fill="none"/>
+</svg>

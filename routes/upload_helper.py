@@ -1,6 +1,7 @@
 """
 Profile Photo Upload Helper Module
 Handles image verification, format checking, size validation, and safe storage.
+Supports persistent cloud storage via Cloudinary as well as secure local disk storage.
 Strictly prevents executable files and path traversal.
 """
 
@@ -19,13 +20,26 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def is_cloudinary_configured():
+    """Checks whether Cloudinary credentials are provided via environment variables."""
+    return bool(
+        os.getenv("CLOUDINARY_URL")
+        or (
+            os.getenv("CLOUDINARY_CLOUD_NAME")
+            and os.getenv("CLOUDINARY_API_KEY")
+            and os.getenv("CLOUDINARY_API_SECRET")
+        )
+    )
+
+
 def validate_and_save_profile_photo(file_storage, user_id):
     """
     Validates uploaded file size, extension, and binary content using Pillow.
-    Saves the image with a generated secure filename in static/uploads/profiles/.
+    If Cloudinary credentials exist, uploads to Cloudinary for permanent hosting.
+    Otherwise, saves the image with a generated secure filename in static/uploads/profiles/.
     
     Returns:
-        tuple (saved_relative_path, error_message)
+        tuple (saved_path_or_url, error_message)
     """
     if not file_storage or not file_storage.filename:
         return None, "No file selected."
@@ -61,13 +75,46 @@ def validate_and_save_profile_photo(file_storage, user_id):
     except Exception as exc:
         return None, "The file could not be verified as a valid image."
 
-    # 3. Generate Secure Unique Filename
+    # 3. Persistent Cloud Storage via Cloudinary (if configured)
+    if is_cloudinary_configured():
+        try:
+            import cloudinary
+            import cloudinary.uploader
+
+            if os.getenv("CLOUDINARY_URL"):
+                cloudinary.config(cloudinary_url=os.getenv("CLOUDINARY_URL"))
+            else:
+                cloudinary.config(
+                    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+                    api_key=os.getenv("CLOUDINARY_API_KEY"),
+                    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+                    secure=True,
+                )
+
+            file_storage.seek(0)
+            upload_result = cloudinary.uploader.upload(
+                file_storage,
+                folder="course_recommender/profiles",
+                public_id=f"profile_{user_id}_{uuid.uuid4().hex[:8]}",
+                overwrite=True,
+                resource_type="image",
+                transformation=[
+                    {"width": 400, "height": 400, "crop": "fill", "gravity": "face"}
+                ],
+            )
+            secure_url = upload_result.get("secure_url")
+            if secure_url:
+                return secure_url, None
+        except Exception:
+            # Fall back cleanly to local disk storage if Cloudinary fails
+            pass
+
+    # 4. Fallback: Save to Local Disk (static/uploads/profiles/)
     safe_name = f"profile_{user_id}_{uuid.uuid4().hex[:10]}.{ext}"
     upload_dir = os.path.join(current_app.root_path, "static", "uploads", "profiles")
     os.makedirs(upload_dir, exist_ok=True)
     full_path = os.path.join(upload_dir, safe_name)
 
-    # 4. Save Image
     try:
         file_storage.seek(0)
         # Re-save through Pillow to strip harmful EXIF/metadata and ensure clean file
@@ -87,15 +134,43 @@ def validate_and_save_profile_photo(file_storage, user_id):
         return None, f"Failed to save image file: {exc}"
 
 
-def delete_profile_photo(relative_path):
+def delete_profile_photo(photo_path):
     """
-    Safely deletes a student profile photo from disk.
+    Safely deletes a student profile photo from Cloudinary or local disk.
     Prevents directory traversal by enforcing base directory checks.
     """
-    if not relative_path:
+    if not photo_path:
         return False
 
-    clean_path = relative_path.lstrip("/\\")
+    # Handle Cloudinary remote URLs
+    if photo_path.startswith("http://") or photo_path.startswith("https://"):
+        if is_cloudinary_configured() and "cloudinary.com" in photo_path:
+            try:
+                import cloudinary
+                import cloudinary.uploader
+
+                if os.getenv("CLOUDINARY_URL"):
+                    cloudinary.config(cloudinary_url=os.getenv("CLOUDINARY_URL"))
+                else:
+                    cloudinary.config(
+                        cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+                        api_key=os.getenv("CLOUDINARY_API_KEY"),
+                        api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+                        secure=True,
+                    )
+
+                if "course_recommender/profiles" in photo_path:
+                    idx = photo_path.find("course_recommender/profiles")
+                    public_id_with_ext = photo_path[idx:]
+                    public_id = public_id_with_ext.rsplit(".", 1)[0]
+                    cloudinary.uploader.destroy(public_id)
+                    return True
+            except Exception:
+                pass
+        return True
+
+    # Handle local disk path
+    clean_path = photo_path.lstrip("/\\")
     full_path = os.path.join(current_app.root_path, "static", clean_path)
     base_dir = os.path.abspath(os.path.join(current_app.root_path, "static", "uploads", "profiles"))
 

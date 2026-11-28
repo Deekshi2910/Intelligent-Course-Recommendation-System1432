@@ -28,3 +28,6 @@ services:
         sync: false
       - key: TIDB_DB_NAME
         value: "intelligent_course_recommendation"
+      # Optional: Cloudinary for permanent photo storage
+      - key: CLOUDINARY_URL
+        sync: false

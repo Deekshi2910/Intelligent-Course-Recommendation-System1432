@@ -59,6 +59,8 @@ def inject_avatar_helper():
                 photo = photo_path
 
         if photo:
+            if photo.startswith("http://") or photo.startswith("https://"):
+                return photo
             clean_photo = photo.lstrip("/\\")
             full_path = os.path.join(app.root_path, "static", clean_photo)
             if os.path.isfile(full_path):

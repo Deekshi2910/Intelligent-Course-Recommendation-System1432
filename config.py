@@ -105,6 +105,7 @@ class Config:
             "user": user,
             "password": password,
             "database": database,
+            "ssl_mode": ssl_mode,
             "ssl_required": ssl_required,
             "ssl_ca": ssl_ca,
             "ssl_verify_cert": ssl_verify_cert,

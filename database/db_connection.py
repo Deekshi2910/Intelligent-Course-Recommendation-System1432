@@ -83,7 +83,7 @@ def get_db_connection(database_name=None):
             ca_bundle = _resolve_ca_bundle(config.get("ssl_ca"))
             if ca_bundle:
                 conn_params["ssl_ca"] = ca_bundle
-        else:
+        elif config.get("ssl_mode") == "DISABLED":
             conn_params["ssl_disabled"] = True
 
         connection = mysql.connector.connect(**conn_params)
